@@ -9,6 +9,8 @@ import path from 'path';
 //   New installs write project config at .impeccable/live/config.json instead.
 export const PER_PROJECT_SCRIPT_ARTIFACTS = new Set(['config.json']);
 
+const DETECTOR_BUNDLE_DIR = 'cli/engine';
+
 // Walk the harness-dir skill tree and return any per-project script
 // artifacts found, ready for restoration after a full sync rm+recopy.
 // Returns [{ relPath, content: Buffer }], where relPath is relative to
@@ -37,6 +39,32 @@ export function restorePerProjectArtifacts(rootDir, stashed) {
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, content);
   }
+}
+
+function readDetectorBundleScripts(rootDir) {
+  const detectorDir = path.join(rootDir, DETECTOR_BUNDLE_DIR);
+  if (!fs.existsSync(detectorDir)) return [];
+
+  const scripts = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const entryPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(entryPath);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      const relPath = path.relative(detectorDir, entryPath).split(path.sep).join('/');
+      scripts.push({
+        name: `detector/${relPath}`,
+        content: fs.readFileSync(entryPath, 'utf-8'),
+        filePath: entryPath,
+        generated: true,
+      });
+    }
+  };
+  walk(detectorDir);
+  return scripts;
 }
 
 /**
@@ -202,6 +230,7 @@ export function readSourceFiles(rootDir) {
       });
     }
   }
+  scripts.push(...readDetectorBundleScripts(rootDir));
 
   const agents = [];
   const agentsDir = path.join(skillDir, 'agents');
@@ -550,6 +579,49 @@ export const PROVIDER_PLACEHOLDERS = {
     command_prefix: '/'
   }
 };
+
+export const PROVIDER_BLOCK_TAGS = new Set([
+  'agents',
+  'claude',
+  'claude-code',
+  'codex',
+  'cursor',
+  'gemini',
+  'github',
+  'kiro',
+  'opencode',
+  'pi',
+  'qoder',
+  'rovo-dev',
+  'trae',
+  'trae-cn',
+]);
+
+/**
+ * Compile harness-conditional markdown blocks.
+ *
+ * Known provider blocks must be written as standalone tags:
+ *
+ * <codex>
+ * Codex-only instructions.
+ * </codex>
+ *
+ * Matching blocks keep their body and drop the tags. Non-matching blocks are
+ * removed. Unknown tags are preserved so ordinary markdown/HTML is untouched.
+ */
+export function compileProviderBlocks(content, activeTags = []) {
+  const activeTagSet = new Set(activeTags);
+  const providerBlockPattern = /(^|\r?\n)[ \t]*<([a-z][a-z0-9-]*)>[ \t]*\r?\n([\s\S]*?)\r?\n[ \t]*<\/\2>[ \t]*(?=\r?\n|$)/g;
+  let didCompileBlock = false;
+
+  const compiled = content.replace(providerBlockPattern, (match, prefix, tag, body) => {
+    if (!PROVIDER_BLOCK_TAGS.has(tag)) return match;
+    didCompileBlock = true;
+    return activeTagSet.has(tag) ? `${prefix}${body}` : prefix;
+  });
+
+  return didCompileBlock ? compiled.replace(/(?:\r?\n){3,}/g, '\n\n') : compiled;
+}
 
 /**
  * Replace all {{placeholder}} tokens with provider-specific values

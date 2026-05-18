@@ -1,5 +1,13 @@
 import path from 'path';
-import { cleanDir, ensureDir, writeFile, generateYamlFrontmatter, generateYamlDocument, replacePlaceholders } from '../utils.js';
+import {
+  cleanDir,
+  ensureDir,
+  writeFile,
+  generateYamlFrontmatter,
+  generateYamlDocument,
+  replacePlaceholders,
+  compileProviderBlocks,
+} from '../utils.js';
 import { SKILL_CATEGORIES, CATEGORY_ORDER } from '../sub-pages-data.js';
 
 /**
@@ -138,7 +146,17 @@ function buildAgentFile(config, agent, body) {
  * @returns {Function} transform(skills, distDir, options?)
  */
 export function createTransformer(config) {
-  const { provider, configDir, displayName, frontmatterFields = [], bodyTransform, placeholderProvider, writeOpenAIMetadata = false, includeVersion = true } = config;
+  const {
+    provider,
+    configDir,
+    displayName,
+    frontmatterFields = [],
+    bodyTransform,
+    placeholderProvider,
+    providerTags = [provider],
+    writeOpenAIMetadata = false,
+    includeVersion = true,
+  } = config;
   const placeholderKey = placeholderProvider || provider;
 
   const activeFields = frontmatterFields
@@ -200,7 +218,8 @@ export function createTransformer(config) {
       const frontmatter = generateYamlFrontmatter(frontmatterObj);
 
       // Build body
-      let skillBody = replacePlaceholders(skill.body, placeholderKey, commandNames, allSkillNames);
+      let skillBody = compileProviderBlocks(skill.body, providerTags);
+      skillBody = replacePlaceholders(skillBody, placeholderKey, commandNames, allSkillNames);
 
       // Replace {{scripts_path}} with provider-aware path to skill's scripts directory
       const scriptsPath = `${configDir}/skills/${skillName}/scripts`;
@@ -220,7 +239,8 @@ export function createTransformer(config) {
         const refDir = path.join(skillDir, 'reference');
         ensureDir(refDir);
         for (const ref of skill.references) {
-          let refContent = replacePlaceholders(ref.content, placeholderKey, [], allSkillNames);
+          let refContent = compileProviderBlocks(ref.content, providerTags);
+          refContent = replacePlaceholders(refContent, placeholderKey, [], allSkillNames);
           refContent = refContent.replace(/\{\{scripts_path\}\}/g, scriptsPath);
           writeFile(path.join(refDir, `${ref.name}.md`), refContent);
           refCount++;
@@ -245,7 +265,8 @@ export function createTransformer(config) {
           // Agents can declare `providers: <list>` to limit which harnesses
           // they emit to. Default (no field) ships everywhere with agentFormat.
           if (agent.providers && !agent.providers.includes(provider)) continue;
-          const body = replacePlaceholders(agent.body, placeholderKey, [], allSkillNames);
+          let body = compileProviderBlocks(agent.body, providerTags);
+          body = replacePlaceholders(body, placeholderKey, [], allSkillNames);
           const agentFile = buildAgentFile(config, agent, body);
           if (!agentFile) continue;
           ensureDir(agentsDir);
