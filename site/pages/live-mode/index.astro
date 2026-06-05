@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import LiveDemoGbar from '../../components/LiveDemoGbar.astro';
+import LiveDemoPalette from '../../components/LiveDemoPalette.astro';
 import '../../styles/sub-pages.css';
 import '../../styles/live-mode.css';
 import '../../styles/live-mode-kinpaku.css';
@@ -103,7 +104,7 @@ import '../../styles/live-mode-kinpaku.css';
           <div class="live-demo-ctx" data-demo-ctx data-phase="hidden">
             <div class="live-demo-ctx-row live-demo-ctx-row--configure">
               <button type="button" class="live-demo-ctx-pill" data-demo-ctx-pill>
-                <span data-demo-cmd-name>delight</span>
+                <span data-demo-cmd-name>adapt</span>
                 <span class="live-demo-ctx-pill-caret" aria-hidden="true">&#x25BE;</span>
               </button>
               <span class="live-demo-ctx-input" data-demo-input>
@@ -112,6 +113,7 @@ import '../../styles/live-mode-kinpaku.css';
               <button type="button" class="live-demo-ctx-count">&times;3</button>
               <button type="button" class="live-demo-ctx-go" data-demo-go>Go <span aria-hidden="true">&rarr;</span></button>
             </div>
+            <LiveDemoPalette pick="delight" />
             <div class="live-demo-ctx-row live-demo-ctx-row--generating">
               <span class="live-demo-ctx-spinner" aria-hidden="true"></span>
               <span>Generating variants&hellip;</span>

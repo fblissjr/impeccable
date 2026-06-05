@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import LiveDemoPalette from '../components/LiveDemoPalette.astro';
 import Testimonials from '../components/Testimonials.astro';
 import LiveDemoGbar from '../components/LiveDemoGbar.astro';
 import '../styles/main.css';
@@ -54,12 +55,12 @@ import '../styles/testimonials.css';
     <div class="hero-rebuild-art" aria-hidden="true"></div>
     <div class="hero-rebuild-container">
       <div class="hero-rebuild-left">
-        <h1 class="hero-rebuild-title">Tune interfaces<br>while they run.</h1>
+        <h1 class="hero-rebuild-title">The missing design<br>vocabulary for agents.</h1>
 
         <p class="hero-rebuild-body">
-          Your AI ships generic frontend by default. Impeccable is an agent skill that teaches it
-          to design: a real visual vocabulary, slop detection, and live iteration in your production
-          codebase. A CLI and Chrome extension extend it into your CI and browser.
+          It's why AI frontends all share one look: no words for hierarchy, contrast, or restraint.
+          Impeccable gives your agent the designer's vocabulary, and gives you the same commands,
+          so you both stop guessing and start directing, live, in your production codebase.
         </p>
 
         <div class="hero-rebuild-actions">
@@ -206,6 +207,7 @@ import '../styles/testimonials.css';
                   <button type="button" class="live-demo-ctx-count">×3</button>
                   <button type="button" class="live-demo-ctx-go" data-demo-go>Go <span aria-hidden="true">→</span></button>
                 </div>
+                <LiveDemoPalette pick="colorize" />
                 <div class="live-demo-ctx-row live-demo-ctx-row--generating">
                   <span class="live-demo-ctx-spinner" aria-hidden="true"></span>
                   <span>Generating variants…</span>

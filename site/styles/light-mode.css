@@ -1352,6 +1352,20 @@ html.light .live-mode-kinpaku .live-demo-ctx-accept {
   color: oklch(14% 0.018 95);
 }
 
+/* Palette switcher — light surface, kinpaku-tinted highlight (the dark graphite
+   chip would be a black smudge on the pale menu). */
+html.light .home-kinpaku .live-demo-ctx-palette,
+html.light .live-mode-kinpaku .live-demo-ctx-palette {
+  background: var(--ks-lacquer-raised);
+  border-color: var(--ks-rule);
+  box-shadow: 0 18px 40px -14px oklch(25% 0.02 95 / 0.18);
+}
+html.light .home-kinpaku .live-demo-ctx-palette-chip.is-highlight,
+html.light .live-mode-kinpaku .live-demo-ctx-palette-chip.is-highlight {
+  background: oklch(78% 0.12 82 / 0.16);
+  color: var(--ks-kinpaku-ink);
+}
+
 html.light .home-kinpaku .live-demo-ctx-caret,
 html.light .live-mode-kinpaku .live-demo-ctx-caret {
   background: var(--ks-kinpaku-rich);
