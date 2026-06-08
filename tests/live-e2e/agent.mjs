@@ -26,7 +26,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { completionTypeForAcceptResult } from '../../skill/scripts/live-completion.mjs';
+import { completionTypeForAcceptResult } from '../../skill/scripts/live/completion.mjs';
 
 const execFileP = promisify(execFile);
 

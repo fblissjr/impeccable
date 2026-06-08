@@ -16,12 +16,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resolveLiveConfigPath } from './impeccable-paths.mjs';
+import { resolveLiveConfigPath } from './lib/impeccable-paths.mjs';
 import {
   applySvelteKitLiveAdapter,
   detectSvelteKitProject,
   removeSvelteKitLiveAdapter,
-} from './live-sveltekit-adapter.mjs';
+} from './live/sveltekit-adapter.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = resolveLiveConfigPath({ cwd: process.cwd(), scriptsDir: __dirname });

@@ -92,7 +92,7 @@ export const SUITES = {
     description: 'Fast live-mode unit and local-server integration tests, excluding full browser fixture sweeps.',
     triggers: [
       ...COMMON_INFRA_PATTERNS,
-      /^skill\/(reference\/live\.md|scripts\/(detect-csp|is-generated|live|live-|modern-screenshot|pin|palette))/,
+      /^skill\/(reference\/live\.md|scripts\/(detect-csp|lib\/is-generated|live\/|live|live-|modern-screenshot|pin|palette))/,
       /^tests\/live-/,
       /^tests\/live-e2e\/(agent|agents\/llm-agent|cli-options|preactions|session|steer|ui)\.mjs$/,
       /^tests\/live-e2e\/agent-insert\.test\.mjs$/,
@@ -138,7 +138,9 @@ export const SUITES = {
       ...COMMON_INFRA_PATTERNS,
       /^tests\/framework-fixtures/,
       /^tests\/framework-fixtures\.test\.mjs$/,
-      /^skill\/scripts\/(detect-csp|is-generated|live-inject|live-sveltekit-adapter|live-wrap)\.mjs$/,
+      /^skill\/scripts\/(detect-csp|live-inject|live-wrap)\.mjs$/,
+      /^skill\/scripts\/lib\/is-generated\.mjs$/,
+      /^skill\/scripts\/live\/sveltekit-adapter\.mjs$/,
     ],
     commands: [
       {
@@ -197,7 +199,8 @@ export const SUITES = {
     needsPlaywright: true,
     triggers: [
       ...COMMON_INFRA_PATTERNS,
-      /^skill\/scripts\/(live-accept|live-browser|live-server|live-sveltekit-adapter|live-wrap)\.mjs$/,
+      /^skill\/scripts\/(live-accept|live-browser|live-server|live-wrap)\.mjs$/,
+      /^skill\/scripts\/live\/sveltekit-adapter\.mjs$/,
       /^tests\/live-e2e-accept-cleanup-regression\.test\.mjs$/,
       /^tests\/live-e2e\//,
     ],
@@ -242,7 +245,8 @@ export const SUITES = {
     needsPlaywright: true,
     triggers: [
       ...COMMON_INFRA_PATTERNS,
-      /^skill\/scripts\/(live-sveltekit-adapter|live-svelte-component|live-server|live-wrap)\.mjs$/,
+      /^skill\/scripts\/(live-server|live-wrap)\.mjs$/,
+      /^skill\/scripts\/live\/(sveltekit-adapter|svelte-component)\.mjs$/,
       /^tests\/framework-fixtures\/vite8-sveltekit-stateful\//,
       /^tests\/live-svelte-adapter-deepseek\.test\.mjs$/,
     ],

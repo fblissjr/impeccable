@@ -82,7 +82,7 @@
   ]);
 
   // Command vocabulary (values + labels + icons) comes from the canonical source,
-  // skill/scripts/live-vocabulary.mjs, which live-server.mjs serializes into
+  // skill/scripts/live/vocabulary.mjs, which live-server.mjs serializes into
   // window.__IMPECCABLE_VOCAB__ when it serves /live.js (same injection path as
   // the token/port above, so it is always present here). The icons stack above
   // each chip label and recolor to C.brand when selected (strokes use
@@ -1216,7 +1216,7 @@
       : (focused ? BP.accentSoft : BP.hairline);
   }
 
-  // Insert mode helpers (mirrors skill/scripts/live-insert-ui.mjs)
+  // Insert mode helpers (mirrors skill/scripts/live/insert-ui.mjs)
 
   function detectInsertAxisFromStyle(style) {
     const display = style?.display || 'block';

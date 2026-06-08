@@ -20,11 +20,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
-import { parseDesignMd } from './design-parser.mjs';
+import { parseDesignMd } from './lib/design-parser.mjs';
 import { resolveContextDir } from './context.mjs';
-import { createLiveSessionStore } from './live-session-store.mjs';
-import { validateEvent } from './live-event-validation.mjs';
-import { LIVE_COMMANDS } from './live-vocabulary.mjs';
+import { createLiveSessionStore } from './live/session-store.mjs';
+import { validateEvent } from './live/event-validation.mjs';
+import { LIVE_COMMANDS } from './live/vocabulary.mjs';
 import {
   getDesignSidecarPath,
   getLiveDir,
@@ -33,20 +33,20 @@ import {
   removeLiveServerInfo,
   resolveDesignSidecarPath,
   writeLiveServerInfo,
-} from './impeccable-paths.mjs';
+} from './lib/impeccable-paths.mjs';
 import {
   countByPage as countPendingByPage,
   readBuffer as readManualEditsBuffer,
   removeEntries as removeManualEditEntries,
   stageEntry as stageManualEditEntry,
   truncateBuffer as truncateManualEditsBuffer,
-} from './live-manual-edits-buffer.mjs';
+} from './live/manual-edits-buffer.mjs';
 import { buildManualEditEvidence } from './live-manual-edit-evidence.mjs';
 import { commitManualEdits } from './live-commit-manual-edits.mjs';
 import {
   applyDeferredSvelteComponentAccepts,
   removeAllSvelteComponentSessions,
-} from './live-svelte-component.mjs';
+} from './live/svelte-component.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // PRODUCT.md / DESIGN.md live wherever context.mjs resolves. The generated

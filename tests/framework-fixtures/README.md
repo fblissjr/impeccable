@@ -1,6 +1,6 @@
 # Framework fixtures
 
-Representative project shapes for exercising live mode against different framework conventions. Each fixture is a small directory tree that the test harness copies into a temp git repo, then drives `live-inject.mjs`, `live-wrap.mjs`, `live-accept.mjs`, and `is-generated.mjs` against.
+Representative project shapes for exercising live mode against different framework conventions. Each fixture is a small directory tree that the test harness copies into a temp git repo, then drives `live-inject.mjs`, `live-wrap.mjs`, `live-accept.mjs`, and `lib/is-generated.mjs` against.
 
 Fixtures can also opt into a **runtime E2E** pass that actually installs dependencies, boots the framework dev server, and drives a Playwright browser to verify the live handshake. See the `runtime` block below.
 
