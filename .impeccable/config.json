@@ -4,6 +4,7 @@
     "ignoreRules": [],
     "ignoreFiles": [
       "tests/fixtures/**",
+      "tests/detect-antipatterns.test.js",
       "site/pages/slop/**"
     ],
     "ignoreValues": [],

@@ -247,6 +247,32 @@ describe('partials skip page-level checks', () => {
   });
 });
 
+describe('detectText — numbered section markers', () => {
+  test('flags visible full-page numbered section labels', () => {
+    const page = '<!DOCTYPE html><html><body>' +
+      '<section><span>01</span><h2>Strategy</h2></section>' +
+      '<section><span>02</span><h2>Prototype</h2></section>' +
+      '<section><span>03</span><h2>Launch</h2></section>' +
+      '</body></html>';
+    const f = detectText(page, 'test.html');
+    expect(f.some(r => r.antipattern === 'numbered-section-markers')).toBe(true);
+  });
+
+  test('does not run page-level numbered marker analysis on JS source with embedded HTML strings', () => {
+    const source = `
+      const shell = '<!DOCTYPE html><html><head><title>Preview</title></head><body></body></html>';
+      const palette = 'oklch(86% 0.07 84 / 0.08)';
+      const shadow = '0 0 0 1px oklch(0% 0 0 / 0.04), 0 4px 16px oklch(0% 0 0 / 0.05), 0 1px 3px oklch(0% 0 0 / 0.06)';
+      const size = '11.5px';
+      const eye = '<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg>';
+      const shader = 'float band = bandAt(uv.y - y, 0.05, 0.32);';
+      const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    `;
+    const f = detectText(source, 'live-browser.js');
+    expect(f.filter(r => r.antipattern === 'numbered-section-markers')).toHaveLength(0);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Layout anti-patterns
 // ---------------------------------------------------------------------------

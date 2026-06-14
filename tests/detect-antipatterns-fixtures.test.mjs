@@ -242,6 +242,17 @@ describe('detectHtml — static HTML/CSS fixtures', () => {
     const f = await detectHtml(path.join(FIXTURES, 'typography-should-pass.html'));
     assert.equal(f.length, 0);
   });
+
+  it('numbered-section-markers: visible sequence flags while script/style/svg internals pass', async () => {
+    const f = await detectHtml(path.join(FIXTURES, 'numbered-section-markers.html'));
+    const numbered = f.filter(r => r.antipattern === 'numbered-section-markers');
+    assert.equal(
+      numbered.length,
+      1,
+      `expected one visible numbered-marker finding, got: ${numbered.map(r => r.snippet).join('; ')}`
+    );
+    assert.match(numbered[0].snippet, /01, 02, 03/);
+  });
 });
 
 describe('detectHtml — icon-tile-stack', () => {
