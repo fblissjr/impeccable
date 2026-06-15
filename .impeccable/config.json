@@ -7,7 +7,14 @@
       "tests/detect-antipatterns.test.js",
       "site/pages/slop/**"
     ],
-    "ignoreValues": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "bounce-ball",
+        "createdAt": "2026-06-15T04:15:03.164Z",
+        "reason": "User confirmed ball bounce animation is intentional"
+      }
+    ],
     "limits": {
       "maxFindings": 5,
       "maxChars": 8000

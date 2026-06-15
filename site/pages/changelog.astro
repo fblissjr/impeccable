@@ -28,7 +28,7 @@ import '../styles/changelog-faq-kinpaku.css';
       <p class="cf-entry-lead">Project design hooks, deeper Live Mode support for Svelte and manual edits, and a broad detector accuracy pass across the skill, CLI, and extension.</p>
       <ul class="cf-items">
         <li><strong>Project design hooks.</strong> <code>/impeccable hooks</code> installs and repairs a project-local detector hook for Claude, Codex, and Cursor. Claude and Codex get post-edit reminders, Cursor can block proposed writes before they land, and <code>/impeccable hooks on</code> now handles manifest setup and consent instead of leaving users to wire files by hand.</li>
-        <li><strong>Hook findings are actionable, not noisy.</strong> Hook runs track clean, pending, and fresh findings, cache duplicate reports, audit their own activity, and offer narrow ignore flows through <code>ignore-value</code>, <code>ignore-file</code>, and <code>ignore-rule</code>. Shared config lives in <code>.impeccable/config.json</code>, with local consent and overrides in <code>.impeccable/config.local.json</code>.</li>
+        <li><strong>Hook findings are actionable, not noisy.</strong> Hook runs track clean, pending, and fresh findings, cache duplicate reports, audit their own activity, and now frame detector output as findings requiring review: fix true issues, but use context judgment for intentional designs such as literal bounce motion. Narrow ignore flows through <code>ignore-value</code>, <code>ignore-file</code>, and <code>ignore-rule</code> keep confirmed exceptions out of source comments. Shared config lives in <code>.impeccable/config.json</code>, with local consent and overrides in <code>.impeccable/config.local.json</code>.</li>
         <li><strong>Svelte-native Live Mode.</strong> Svelte and SvelteKit variants now preview as temporary framework components with params stored in <code>params.json</code>, then accept back into the selected source component. That keeps stateful pages closer to their real shape and avoids the HMR resets caused by string-injected previews.</li>
         <li><strong>Manual and browser Live Mode got sturdier.</strong> Manual text edits have dedicated evidence, apply, and discard routes; Live Mode preserves insertion anchors and mapped-list accept cleanup; and the browser payload is split into DOM helpers, UI primitives, vocabulary, and manual-apply modules instead of one giant script.</li>
         <li><strong>Detector accuracy improved across the bundled skill.</strong> Hidden and unrendered elements are skipped in browser rules, sr-only and visually hidden text no longer trips <code>text-overflow</code>, repeated kicker false positives are reduced in card and list contexts, oversized H1 detection now requires viewport dominance, clipped overflow distinguishes decorative viewports from escaping content, OKLCH alpha parses correctly, Sass files count as CSS-like detector inputs, transparent borders or shadows no longer trigger the GPT thin-border rule, and page-level numbered-marker checks no longer treat JS, TS, JSX, TSX, or CSS implementation literals as visible page copy.</li>
@@ -83,6 +83,14 @@ import '../styles/changelog-faq-kinpaku.css';
       </ul>
     </article>
 
+    <article id="cli-v3.0.1" class="cf-entry">
+      <header class="cf-entry-head"><span class="cf-version">CLI v3.0.1</span><span class="cf-date">June 15, 2026</span></header>
+      <ul class="cf-items">
+        <li><strong>Motion findings preserve the actual value.</strong> <code>bounce-easing</code> findings now report the concrete animation token, Tailwind class, or overshooting cubic-bezier value instead of collapsing animation names to a generic <code>bounce</code>. That gives hooks and audits enough information to suggest narrow <code>ignore-value</code> exceptions for intentional motion.</li>
+        <li><strong>Project hook guidance uses judgment first.</strong> Hook output now says findings require review, not automatic correction. Agents are told to fix real design problems, classify contextual false positives explicitly, and avoid changing intentional design just to satisfy the detector.</li>
+      </ul>
+    </article>
+
     <article id="cli-v3.0.0" class="cf-entry">
       <header class="cf-entry-head"><span class="cf-version">CLI v3.0.0</span><span class="cf-date">June 14, 2026</span></header>
       <ul class="cf-items">
@@ -134,7 +142,7 @@ import '../styles/changelog-faq-kinpaku.css';
       <ul class="cf-items">
         <li><strong>Firefox build.</strong> The same detector, popup, DevTools panel, and per-rule toggles now ship as a Firefox add-on. <code>bun run build:extension</code> emits a Gecko-compatible package next to the Chrome one, with the background worker declared as an event page and a data-collection declaration that states what the extension already does: the scan runs in the page, and nothing leaves your machine.</li>
         <li><strong>Firefox DevTools paths are fixed.</strong> DevTools panel and sidebar URLs are root-relative in the Firefox manifest, so packaged builds can open their extension pages reliably.</li>
-        <li><strong>Detector results match the latest engine.</strong> The overlay picks up the same false-positive fixes as the CLI: hidden-element skips, sr-only text-overflow handling, tighter repeated kicker, oversized H1, clipped-overflow, OKLCH alpha, Sass-adjacent CSS parsing, and transparent-border handling.</li>
+        <li><strong>Detector results match the latest engine.</strong> The overlay picks up the same false-positive fixes as the CLI: hidden-element skips, sr-only text-overflow handling, tighter repeated kicker, oversized H1, clipped-overflow, OKLCH alpha, Sass-adjacent CSS parsing, transparent-border handling, and exact animation values for bounce/easing findings.</li>
         <li><strong>Scan responses are easier to correlate.</strong> Extension scan messages echo scan IDs back to the caller, and the store metadata and icon set were refreshed for the current 41-rule detector.</li>
       </ul>
     </article>

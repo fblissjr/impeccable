@@ -541,8 +541,10 @@ describe('detectText — motion', () => {
   });
 
   test('detects animation: bounce CSS', () => {
-    const f = detectText('.icon { animation: bounce 1s infinite; }', 'test.css');
-    expect(f.some(r => r.antipattern === 'bounce-easing')).toBe(true);
+    const f = detectText('.icon { animation: bounce-ball 1s infinite; }', 'test.css');
+    const finding = f.find(r => r.antipattern === 'bounce-easing');
+    expect(finding).toBeTruthy();
+    expect(finding.snippet).toBe('animation: bounce-ball');
   });
 
   test('detects animation-name: elastic', () => {

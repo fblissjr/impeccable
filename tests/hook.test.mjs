@@ -336,15 +336,20 @@ describe('filterFindings()', () => {
     const findings = [
       finding('overused-font', 1, { snippet: 'Primary font: Inter (86% of text)' }),
       finding('overused-font', 2, { snippet: 'Primary font: Roboto' }),
+      finding('bounce-easing', 3, { snippet: 'animation: bounce-ball' }),
+      finding('bounce-easing', 4, { snippet: 'animation: wobble-card' }),
       finding('side-tab', 3),
     ];
     const filtered = filterFindings(findings, '', '.css', {
       ignoreRules: [],
-      ignoreValues: [{ rule: 'overused-font', value: 'inter' }],
+      ignoreValues: [
+        { rule: 'overused-font', value: 'inter' },
+        { rule: 'bounce-easing', value: 'bounce-ball' },
+      ],
       minSeverity: 'warning',
       limits: DEFAULT_CONFIG.limits,
     });
-    assert.deepEqual(filtered.map((f) => `${f.antipattern}:${f.line}`), ['overused-font:2', 'side-tab:3']);
+    assert.deepEqual(filtered.map((f) => `${f.antipattern}:${f.line}`), ['overused-font:2', 'bounce-easing:4', 'side-tab:3']);
   });
 
   it('extracts overused-font values from primary, CSS, and Google font snippets', () => {
@@ -361,6 +366,21 @@ describe('filterFindings()', () => {
       'plus jakarta sans',
     );
     assert.equal(extractFindingIgnoreValue(finding('side-tab', 1)), '');
+  });
+
+  it('extracts bounce-easing values from motion snippets', () => {
+    assert.equal(
+      extractFindingIgnoreValue(finding('bounce-easing', 1, { snippet: 'animation: bounce-ball' })),
+      'bounce-ball',
+    );
+    assert.equal(
+      extractFindingIgnoreValue(finding('bounce-easing', 1, { snippet: 'animate-bounce (Tailwind)' })),
+      'animate-bounce',
+    );
+    assert.equal(
+      extractFindingIgnoreValue(finding('bounce-easing', 1, { snippet: 'cubic-bezier(0.3, -0.4, 0.6, 1.4)' })),
+      'cubic-bezier(0.3, -0.4, 0.6, 1.4)',
+    );
   });
 });
 
@@ -529,7 +549,7 @@ describe('renderTemplate()', () => {
     const findings = Array.from({ length: 12 }, (_, i) =>
       finding('side-tab', i + 1, { name: `R${i}`, description: 'd' }));
     const text = renderTemplate(findings, '/x/Card.tsx', DEFAULT_CONFIG, { cwd: '/x' });
-    assert.ok(text.startsWith(`${ENVELOPE_PREFIX} Required design corrections in Card.tsx (12 issue(s)):`));
+    assert.ok(text.startsWith(`${ENVELOPE_PREFIX} Design hook findings requiring review in Card.tsx (12 issue(s)):`));
     assert.match(text, /\.\.\. and 7 more \(see \/impeccable audit\)\./);
     // Exactly 5 finding lines.
     const lines = text.split('\n').filter((l) => l.startsWith('- '));
@@ -537,19 +557,23 @@ describe('renderTemplate()', () => {
     assert.ok(text.length <= DEFAULT_CONFIG.limits.maxChars);
   });
 
-  it('emits a directive footer (imperative + exception clause + confirmed ignore guidance)', () => {
-    // Steers the model: imperative "fix", explicit exception for
-    // intentional bad UI / fixtures, and "acknowledge" so the user
-    // sees the correction in the chat reply. See `directiveFooter()`
-    // in hook-lib.mjs for the rationale.
+  it('emits a directive footer (imperative + judgment clause + confirmed ignore guidance)', () => {
+    // Steers the model: imperative "handle", explicit context judgment
+    // before editing, and "acknowledge" so the user sees the resolution
+    // in the chat reply. See `directiveFooter()` in hook-lib.mjs for
+    // the rationale.
     const text = renderTemplate(
       [finding('side-tab', 1, { name: 'X' })],
       '/x/Card.tsx', DEFAULT_CONFIG, { cwd: '/x' }
     );
-    assert.match(text, /Fix these in your next reply/);
-    assert.match(text, /Acknowledge what you changed/);
-    assert.match(text, /intentionally bad UI|anti-pattern example|test fixture/);
-    assert.match(text, /Do not add hook ignores unless the user explicitly confirms/);
+    assert.match(text, /Handle these before finalizing/);
+    assert.match(text, /fix findings that are real design problems/);
+    assert.match(text, /classify contextually intentional findings as false positives/);
+    assert.match(text, /Use context judgment before editing/);
+    assert.match(text, /not automatically a defect/);
+    assert.match(text, /literal or domain-appropriate motion/);
+    assert.match(text, /Do not change intentional design just to satisfy the hook/);
+    assert.match(text, /Persist hook ignores only after the user explicitly confirms/);
     assert.match(text, /Do not add source comments such as `impeccable: ignore`/);
     assert.match(text, /ignore-value \.\.\. --shared/);
     assert.match(text, /ignore-rule overused-font --all-values/);
@@ -565,6 +589,14 @@ describe('renderTemplate()', () => {
     );
     assert.match(text, /\/impeccable hooks ignore-value overused-font Roboto --shared/);
     assert.match(text, /ignore-rule overused-font --all-values/);
+  });
+
+  it('shows the exact value-specific command for bounce-easing findings', () => {
+    const text = renderTemplate(
+      [finding('bounce-easing', 1, { name: 'Bounce or elastic easing', snippet: 'animation: bounce-ball' })],
+      '/x/main.css', DEFAULT_CONFIG, { cwd: '/x' }
+    );
+    assert.match(text, /\/impeccable hooks ignore-value bounce-easing bounce-ball --shared/);
   });
 
   it('drops the L<line> prefix when line is 0', () => {
@@ -706,13 +738,13 @@ describe('runHook()', () => {
     const r1 = await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: det });
     assert.equal(r1.exitCode, 0);
     assert.ok(r1.stdout.includes(ENVELOPE_PREFIX));
-    assert.match(r1.stdout, /Required design corrections/);
+    assert.match(r1.stdout, /Design hook findings requiring review/);
     assert.equal(r1.audit.emitted, true);
 
     const r2 = await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: det });
     assert.equal(r2.exitCode, 0);
     assert.ok(r2.stdout.includes(ENVELOPE_PREFIX));
-    assert.match(r2.stdout, /Still has 1 issue\(s\) flagged earlier this session/);
+    assert.match(r2.stdout, /Still has 1 finding\(s\) flagged earlier this session/);
     assert.match(r2.stdout, /side-tab:1/);
     assert.equal(r2.audit.emitted, true);
     assert.equal(r2.audit.kind, 'pending');
@@ -754,7 +786,7 @@ describe('runHook()', () => {
       cwd,
       detector: fakeDetector([finding('side-tab', 1)]),
     });
-    assert.match(r.stdout, /Required design corrections/);
+    assert.match(r.stdout, /Design hook findings requiring review/);
     assert.match(r.stdout, /side-tab/);
   });
 
@@ -762,7 +794,7 @@ describe('runHook()', () => {
     const file = writeFixture('src/build.js', 'export const value = 1;');
     const det = fakeDetector([finding('side-tab', 1)]);
     const first = await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: det });
-    assert.match(first.stdout, /Required design corrections/);
+    assert.match(first.stdout, /Design hook findings requiring review/);
 
     const second = await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: det });
     assert.equal(second.stdout, '');
@@ -793,7 +825,7 @@ describe('runHook()', () => {
       env: { IMPECCABLE_HOOK_QUIET: '1' }, cwd, detector: detFindings,
     });
     assert.ok(rFindings.stdout.includes(ENVELOPE_PREFIX));
-    assert.match(rFindings.stdout, /Required design corrections/);
+    assert.match(rFindings.stdout, /Design hook findings requiring review/);
     assert.equal(rFindings.audit.emitted, true);
   });
 
@@ -965,7 +997,7 @@ describe('runHook()', () => {
     const det = fakeDetector([finding('side-tab', 1)]);
     const r = await runHook({ stdinJson: JSON.stringify(event), env: {}, cwd, detector: det });
     assert.equal(r.exitCode, 0);
-    assert.match(r.stdout, /Required design corrections/);
+    assert.match(r.stdout, /Design hook findings requiring review/);
   });
 
   it('detector throw is swallowed; never breaks turn', async () => {
@@ -989,7 +1021,7 @@ describe('runHook()', () => {
       cwd,
       detector: { detectHtml, detectText },
     });
-    assert.match(r.stdout, /Required design corrections/);
+    assert.match(r.stdout, /Design hook findings requiring review/);
     assert.doesNotMatch(r.stdout, /No anti-patterns/);
     assert.ok(r.audit.findings > 0);
   });
@@ -1053,10 +1085,10 @@ describe('renderCleanAck() / renderPendingAck()', () => {
     const known = ['side-tab:3', 'gradient-text:4', 'ai-color-palette:8', 'overused-font:12'];
     const text = renderPendingAck('/x/src/SlopCard.jsx', known, { cwd: '/x' });
     assert.match(text, /^\[impeccable@1\] Design hook scanned src\/SlopCard\.jsx\./);
-    assert.match(text, /Still has 4 issue\(s\) flagged earlier this session/);
+    assert.match(text, /Still has 4 finding\(s\) flagged earlier this session/);
     assert.match(text, /side-tab:3, gradient-text:4, ai-color-palette:8/);
     assert.match(text, /\+1 more/); // 4 total, 3 shown
-    assert.match(text, /Address them before finalizing/);
+    assert.match(text, /Handle them before finalizing/);
   });
 
   it('renderPendingAck omits the "+N more" suffix when ≤3 known findings', () => {
@@ -1229,7 +1261,7 @@ describe('runHook() — co-located stylesheet scan', () => {
       cwd,
       detector: det,
     });
-    assert.match(r.stdout, /Required design corrections/);
+    assert.match(r.stdout, /Design hook findings requiring review/);
     assert.match(r.stdout, /styles\.css/);
   });
 
@@ -1254,7 +1286,7 @@ describe('runHook() — co-located stylesheet scan', () => {
       cwd,
       detector: det,
     });
-    assert.match(r.stdout, /Required design corrections/);
+    assert.match(r.stdout, /Design hook findings requiring review/);
     assert.match(r.stdout, /styles\.sass/);
   });
 
@@ -1285,7 +1317,7 @@ describe('runHook() — co-located stylesheet scan', () => {
       detector: det,
     });
 
-    assert.match(r.stdout, /Required design corrections/);
+    assert.match(r.stdout, /Design hook findings requiring review/);
     assert.match(r.stdout, /App\.jsx/);
     assert.match(r.stdout, /styles\.css/);
     assert.match(r.stdout, /side-tab/);
@@ -1415,7 +1447,7 @@ describe('Cursor hook scripts', () => {
     assert.equal(payload.permission, 'deny');
     assert.match(payload.user_message, /blocked this write/);
     assert.match(payload.user_message, /side-tab/);
-    assert.match(payload.agent_message, /Fix these in your next reply/);
+    assert.match(payload.agent_message, /Handle these before finalizing/);
 
     const entries = fs.readFileSync(logPath, 'utf-8').trim().split('\n').map((line) => JSON.parse(line));
     assert.equal(entries[0].event, 'preToolUse');
