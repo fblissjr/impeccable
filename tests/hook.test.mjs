@@ -133,7 +133,7 @@ describe('readConfig()', () => {
     assert.equal(cfg.limits.maxFindings, DEFAULT_CONFIG.limits.maxFindings);
   });
 
-  it('parses enabled, ignoreRules, ignoreFiles, limits', () => {
+  it('parses hook runtime and legacy hook detector filters', () => {
     fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       hook: {
@@ -158,26 +158,30 @@ describe('readConfig()', () => {
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       hook: {
         enabled: false,
+        minSeverity: 'error',
+        limits: { maxFindings: 2, maxChars: 1000 },
+      },
+      detector: {
         ignoreRules: ['side-tab'],
         ignoreFiles: ['src/legacy/**'],
         ignoreValues: [
           { rule: 'overused-font', value: 'inter', reason: 'team default' },
         ],
-        minSeverity: 'error',
-        limits: { maxFindings: 2, maxChars: 1000 },
       },
     }));
     fs.writeFileSync(getLocalConfigPath(cwd), JSON.stringify({
       hook: {
         enabled: true,
+        minSeverity: 'warning',
+        limits: { maxFindings: 4 },
+      },
+      detector: {
         ignoreRules: ['gradient-text', 'side-tab'],
         ignoreFiles: ['src/local/**'],
         ignoreValues: [
           { rule: 'overused-font', value: 'Roboto' },
           { rule: 'overused-font', value: 'Inter', reason: 'local override' },
         ],
-        minSeverity: 'warning',
-        limits: { maxFindings: 4 },
       },
     }));
 
@@ -220,10 +224,12 @@ describe('readConfig()', () => {
     fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       hook: { quiet: true, auditLog: '~/hook.ndjson' },
+      detector: { designSystem: { enabled: false } },
     }));
     const cfg = readConfig(cwd);
     assert.equal(cfg.quiet, true);
     assert.equal(cfg.auditLog, '~/hook.ndjson');
+    assert.deepEqual(cfg.designSystem, { enabled: false });
   });
 });
 
@@ -243,6 +249,22 @@ describe('readCache / persistCache / bumpEditCount', () => {
     const file = reloaded.sessions['sid-1'].files['/x/a.tsx'];
     assert.equal(file.editCount, 2);
     assert.ok(file.findings.includes('side-tab:12'));
+  });
+
+  it('keeps same-line value-specific findings distinct in the cache', () => {
+    const cache = readCache(cwd);
+    const hotPink = {
+      ...finding('design-system-color', 7, { snippet: 'Undocumented color #ff00aa' }),
+      ignoreValue: '#ff00aa',
+    };
+    const cyan = {
+      ...finding('design-system-color', 7, { snippet: 'Undocumented color rgb(20, 180, 220)' }),
+      ignoreValue: 'rgb(20, 180, 220)',
+    };
+
+    assert.deepEqual(dedupeAgainstCache([hotPink, cyan], cache, 'sid-1', '/x/a.css'), [hotPink, cyan]);
+    rememberFindings(cache, 'sid-1', '/x/a.css', [hotPink]);
+    assert.deepEqual(dedupeAgainstCache([hotPink, cyan], cache, 'sid-1', '/x/a.css'), [cyan]);
   });
 
   it('garbage-collects oldest sessions over CACHE_MAX_SESSIONS', () => {
@@ -352,6 +374,63 @@ describe('filterFindings()', () => {
     assert.deepEqual(filtered.map((f) => `${f.antipattern}:${f.line}`), ['overused-font:2', 'bounce-easing:4', 'side-tab:3']);
   });
 
+  it('scopes ignoreValues to file globs when files are provided', () => {
+    const findings = [
+      { ...finding('design-system-color', 1, { file: '/tmp/project/site/styles/main.css' }), ignoreValue: '#8b5cf6' },
+      { ...finding('design-system-color', 2, { file: '/tmp/project/site/styles/feature.css' }), ignoreValue: '#8b5cf6' },
+      { ...finding('design-system-color', 3, { file: '/tmp/project/site/styles/home-kinpaku.css' }), ignoreValue: 'oklch(60% 0.25 350 / 0.22)' },
+    ];
+    const filtered = filterFindings(findings, '', '.css', {
+      ignoreRules: [],
+      ignoreValues: [
+        { rule: 'design-system-color', value: '#8b5cf6', files: ['site/styles/main.css'] },
+        { rule: 'design-system-color', value: 'oklch(60% 0.25 350 / 0.22)', file: 'site/styles/home-kinpaku.css' },
+      ],
+      limits: DEFAULT_CONFIG.limits,
+    });
+    assert.deepEqual(filtered.map((f) => `${f.file}:${f.line}`), ['/tmp/project/site/styles/feature.css:2']);
+  });
+
+  it('matches equivalent design-system color ignore values', () => {
+    const findings = [
+      { ...finding('design-system-color', 1, { file: '/tmp/project/site/styles/rgb.css' }), ignoreValue: 'rgb(139, 92, 246)' },
+      { ...finding('design-system-color', 2, { file: '/tmp/project/site/styles/hex.css' }), ignoreValue: '#8b5cf6' },
+      { ...finding('design-system-color', 3, { file: '/tmp/project/site/styles/alpha.css' }), ignoreValue: 'rgba(139, 92, 246, 0.5)' },
+      { ...finding('design-system-color', 4, { file: '/tmp/project/site/styles/other.css' }), ignoreValue: '#8b5cf7' },
+      { ...finding('design-system-radius', 5, { file: '/tmp/project/site/styles/radius.css' }), ignoreValue: 'rgb(139, 92, 246)' },
+    ];
+    const filtered = filterFindings(findings, '', '.css', {
+      ignoreRules: [],
+      ignoreValues: [
+        { rule: 'design-system-color', value: '#8b5cf6' },
+        { rule: 'design-system-color', value: 'rgb(139 92 246 / 100%)' },
+      ],
+      limits: DEFAULT_CONFIG.limits,
+    });
+    assert.deepEqual(filtered.map((f) => `${f.antipattern}:${f.line}`), [
+      'design-system-color:3',
+      'design-system-color:4',
+      'design-system-radius:5',
+    ]);
+  });
+
+  it('allows wildcard ignoreValues only when scoped to files', () => {
+    const findings = [
+      { ...finding('design-system-color', 1, { file: '/tmp/project/site/styles/main.css' }), ignoreValue: '#8b5cf6' },
+      { ...finding('design-system-color', 2, { file: '/tmp/project/site/styles/feature.css' }), ignoreValue: '#8b5cf6' },
+      { ...finding('design-system-font', 3, { file: '/tmp/project/site/styles/main.css' }), ignoreValue: 'Inter' },
+    ];
+    const filtered = filterFindings(findings, '', '.css', {
+      ignoreRules: [],
+      ignoreValues: [
+        { rule: 'design-system-color', value: '*', files: ['site/styles/main.css'] },
+        { rule: 'design-system-font', value: '*' },
+      ],
+      limits: DEFAULT_CONFIG.limits,
+    });
+    assert.deepEqual(filtered.map((f) => `${f.antipattern}:${f.line}`), ['design-system-color:2', 'design-system-font:3']);
+  });
+
   it('extracts overused-font values from primary, CSS, and Google font snippets', () => {
     assert.equal(
       extractFindingIgnoreValue(finding('overused-font', 1, { snippet: 'Primary font: Open Sans (80% of text)' })),
@@ -403,8 +482,9 @@ describe('hook-admin.mjs', () => {
     const out = runAdmin(['ignore-value', 'overused-font', 'Inter', '--reason', 'User confirmed Inter']);
     assert.match(out, /overused-font=inter/);
     assert.equal(fs.existsSync(getLocalConfigPath(cwd)), false);
-    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).hook;
-    assert.equal(shared.enabled, true);
+    const raw = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8'));
+    assert.equal(raw.hook, undefined);
+    const shared = raw.detector;
     assert.deepEqual(shared.ignoreRules, []);
     assert.deepEqual(shared.ignoreValues.map(({ rule, value, reason }) => ({ rule, value, reason })), [
       { rule: 'overused-font', value: 'inter', reason: 'User confirmed Inter' },
@@ -415,7 +495,7 @@ describe('hook-admin.mjs', () => {
   it('ignore-value --shared remains accepted for shared config', () => {
     runAdmin(['ignore-value', 'overused-font', 'Open', 'Sans', '--shared', '--reason', 'Brand font']);
     assert.equal(fs.existsSync(getLocalConfigPath(cwd)), false);
-    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).hook;
+    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).detector;
     assert.deepEqual(shared.ignoreValues.map(({ rule, value, reason }) => ({ rule, value, reason })), [
       { rule: 'overused-font', value: 'open sans', reason: 'Brand font' },
     ]);
@@ -425,8 +505,10 @@ describe('hook-admin.mjs', () => {
     runAdmin(['ignore-value', 'overused-font', 'Inter', '--local']);
     runAdmin(['ignore-value', 'OVERUSED-FONT', '"Inter"', '--local', '--reason', 'Still intentional']);
     assert.equal(fs.existsSync(getConfigPath(cwd)), false);
-    const local = JSON.parse(fs.readFileSync(getLocalConfigPath(cwd), 'utf-8')).hook;
-    assert.equal(local.enabled, undefined, 'local ignore should not override shared enabled state');
+    const raw = JSON.parse(fs.readFileSync(getLocalConfigPath(cwd), 'utf-8'));
+    assert.equal(raw.hook, undefined);
+    const local = raw.detector;
+    assert.equal(local.designSystem, undefined, 'local ignore should not override shared design-system state');
     assert.equal(local.ignoreValues.length, 1);
     assert.equal(local.ignoreValues[0].reason, 'Still intentional');
 
@@ -440,9 +522,9 @@ describe('hook-admin.mjs', () => {
     // A recorded per-developer consent in the local file...
     fs.writeFileSync(getLocalConfigPath(cwd), JSON.stringify({ hook: { consent: 'declined' } }));
     runAdmin(['ignore-value', 'overused-font', 'Inter', '--local']);
-    const local = JSON.parse(fs.readFileSync(getLocalConfigPath(cwd), 'utf-8')).hook;
-    assert.equal(local.consent, 'declined', 'consent must survive a local ignore-value edit');
-    assert.equal(local.ignoreValues.length, 1);
+    const localRaw = JSON.parse(fs.readFileSync(getLocalConfigPath(cwd), 'utf-8'));
+    assert.equal(localRaw.hook.consent, 'declined', 'consent must survive a local ignore-value edit');
+    assert.equal(localRaw.detector.ignoreValues.length, 1);
 
     // ...and a shared quiet flag survives an on/off toggle.
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({ hook: { quiet: true } }));
@@ -498,15 +580,15 @@ describe('hook-admin.mjs', () => {
 
   it('ignore-rule overused-font --all-values writes a whole-rule suppression', () => {
     const out = runAdmin(['ignore-rule', 'overused-font', '--all-values', '--reason', 'User asked to ignore overused fonts generally']);
-    assert.match(out, /Added "overused-font" to ignoreRules/);
-    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).hook;
+    assert.match(out, /Added "overused-font" to detector\.ignoreRules/);
+    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).detector;
     assert.deepEqual(shared.ignoreRules, ['overused-font']);
     assert.deepEqual(shared.ignoreValues, []);
   });
 
   it('ignore-rule still allows non-value rules without --all-values', () => {
     runAdmin(['ignore-rule', 'side-tab']);
-    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).hook;
+    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).detector;
     assert.deepEqual(shared.ignoreRules, ['side-tab']);
   });
 
@@ -524,7 +606,7 @@ describe('hook-admin.mjs', () => {
 
     runAdmin(['ignore-file', 'src/ConfirmedCard.html']);
 
-    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).hook;
+    const shared = JSON.parse(fs.readFileSync(getConfigPath(cwd), 'utf-8')).detector;
     assert.deepEqual(shared.ignoreFiles, ['src/ConfirmedCard.html']);
 
     const r = await runHook({
@@ -726,6 +808,48 @@ describe('runHook()', () => {
     return abs;
   }
 
+  function writeDesignMd() {
+    fs.writeFileSync(path.join(cwd, 'DESIGN.md'), `---
+typography:
+  body:
+    fontFamily: "IBM Plex Sans, Arial, sans-serif"
+colors:
+  ink: "#241f1a"
+rounded:
+  md: "8px"
+---
+
+# Design System
+`);
+  }
+
+  function designFinding(value = 'Poppins') {
+    return {
+      ...finding('design-system-font', 1, {
+        name: 'Font outside DESIGN.md',
+        description: 'A font is used that is not declared in DESIGN.md typography.',
+        snippet: `font-family: "${value}", sans-serif;`,
+      }),
+      ignoreValue: value,
+    };
+  }
+
+  function designAwareDetector({ stale = false } = {}) {
+    return {
+      loadDesignSystemForCwd: (projectCwd) => (
+        fs.existsSync(path.join(projectCwd, 'DESIGN.md'))
+          ? { present: true, hasFonts: true, mdNewerThanJson: stale }
+          : null
+      ),
+      detectText: (_content, _filePath, options = {}) => (
+        options.designSystem ? [designFinding()] : []
+      ),
+      detectHtml: (_filePath, options = {}) => (
+        options.designSystem ? [designFinding()] : []
+      ),
+    };
+  }
+
   it('emits findings on first fire, then a pending-ack on subsequent dedup hits', async () => {
     // The "no silent fires" policy turns the previously-silent dedup hit
     // into a pending re-nudge that keeps the unresolved finding in the
@@ -892,6 +1016,94 @@ describe('runHook()', () => {
     assert.equal(r.audit.skipped, 'config-disabled');
   });
 
+  it('only unlocks design-system detector findings when DESIGN.md exists', async () => {
+    const file = writeFixture('src/Card.tsx', '.card { font-family: "Poppins", sans-serif; }');
+    const det = designAwareDetector();
+
+    const withoutDesign = await runHook({
+      stdinJson: JSON.stringify(eventFor(file, 'design-system-off')),
+      env: {},
+      cwd,
+      detector: det,
+    });
+    assert.match(withoutDesign.stdout, /No anti-patterns/);
+    assert.doesNotMatch(withoutDesign.stdout, /design-system-font/);
+
+    writeDesignMd();
+    const withDesign = await runHook({
+      stdinJson: JSON.stringify(eventFor(file, 'design-system-on')),
+      env: {},
+      cwd,
+      detector: det,
+    });
+    assert.match(withDesign.stdout, /Design hook findings requiring review/);
+    assert.match(withDesign.stdout, /design-system-font/);
+    assert.match(withDesign.stdout, /ignore-value design-system-font Poppins --shared/);
+  });
+
+  it('respects detector.designSystem.enabled=false', async () => {
+    writeDesignMd();
+    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
+      detector: { designSystem: { enabled: false } },
+    }));
+    const file = writeFixture('src/Card.tsx', '.card { font-family: "Poppins", sans-serif; }');
+
+    const r = await runHook({
+      stdinJson: JSON.stringify(eventFor(file, 'design-system-disabled')),
+      env: {},
+      cwd,
+      detector: designAwareDetector(),
+    });
+
+    assert.match(r.stdout, /No anti-patterns/);
+    assert.doesNotMatch(r.stdout, /design-system-font/);
+  });
+
+  it('suppresses design-system findings through ignore-value', async () => {
+    writeDesignMd();
+    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
+      detector: {
+        ignoreValues: [
+          { rule: 'design-system-font', value: 'Poppins' },
+        ],
+      },
+    }));
+    const file = writeFixture('src/Card.tsx', '.card { font-family: "Poppins", sans-serif; }');
+
+    const r = await runHook({
+      stdinJson: JSON.stringify(eventFor(file, 'design-system-ignore-value')),
+      env: {},
+      cwd,
+      detector: designAwareDetector(),
+    });
+
+    assert.match(r.stdout, /No anti-patterns/);
+    assert.doesNotMatch(r.stdout, /design-system-font/);
+  });
+
+  it('adds a non-blocking note when DESIGN.md is newer than the sidecar', async () => {
+    writeDesignMd();
+    const file = writeFixture('src/Card.tsx', 'noop');
+    const det = {
+      loadDesignSystemForCwd: () => ({ present: true, mdNewerThanJson: true }),
+      detectText: () => [],
+      detectHtml: () => [],
+    };
+
+    const r = await runHook({
+      stdinJson: JSON.stringify(eventFor(file, 'design-system-stale-sidecar')),
+      env: {},
+      cwd,
+      detector: det,
+    });
+
+    assert.match(r.stdout, /No anti-patterns/);
+    assert.match(r.stdout, /DESIGN\.md is newer than \.impeccable\/design\.json/);
+    assert.match(r.stdout, /\/impeccable document/);
+  });
+
   it('rejects sensitive paths before reading file content', async () => {
     const file = path.join(cwd, '.env');
     fs.writeFileSync(file, 'SECRET=42');
@@ -927,7 +1139,7 @@ describe('runHook()', () => {
     const file = writeFixture('src/legacy/Foo.tsx', 'noop');
     fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
-      hook: { ignoreFiles: ['src/legacy/**'] },
+      detector: { ignoreFiles: ['src/legacy/**'] },
     }));
     const det = fakeDetector([finding('side-tab', 1)]);
     const r = await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: det });

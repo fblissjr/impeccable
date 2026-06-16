@@ -29,7 +29,7 @@ export const SUITES = {
       /^site\/(pages|content|components|layouts)\//,
       /^README(\.npm)?\.md$/,
       /^cli\/bin\//,
-      /^tests\/(build|cleanup-deprecated|context|context-signals|critique-storage|design-parser|docs-integrity|hook|hook-build|impeccable-paths|skills-cli|test-suites|windows-path-fix|zip)\.test\.(js|mjs)$/,
+      /^tests\/(build|cleanup-deprecated|cli-ignores|context|context-signals|critique-storage|design-parser|docs-integrity|hook|hook-build|impeccable-paths|shiki-theme|skills-cli|test-suites|windows-path-fix|zip)\.test\.(js|mjs)$/,
       /^tests\/lib\//,
     ],
     commands: [
@@ -37,6 +37,7 @@ export const SUITES = {
         runner: 'bun',
         files: [
           'tests/build.test.js',
+          'tests/cli-ignores.test.js',
           'tests/windows-path-fix.test.js',
           'tests/lib/provider-blocks.test.js',
           'tests/lib/transformers/provider-blocks.test.js',
@@ -59,6 +60,7 @@ export const SUITES = {
           'tests/hook-build.test.mjs',
           'tests/hook.test.mjs',
           'tests/impeccable-paths.test.mjs',
+          'tests/shiki-theme.test.mjs',
           'tests/test-suites.test.mjs',
           'tests/zip.test.mjs',
         ],
@@ -74,6 +76,7 @@ export const SUITES = {
       /^extension\/(background|content|detector|devtools|popup|manifest\.json)/,
       /^scripts\/(benchmark-detector|build-browser-detector|build-extension)\.js$/,
       /^site\/(pages\/detector|public\/antipattern|data\/anti-patterns-catalog\.js)/,
+      /^tests\/design-system\.test\.mjs$/,
       /^tests\/(detect-antipatterns|extension-build|fixtures\/antipatterns)/,
     ],
     commands: [
@@ -88,6 +91,7 @@ export const SUITES = {
         runner: 'node',
         files: [
           'tests/extension-build.test.mjs',
+          'tests/design-system.test.mjs',
           'tests/detect-antipatterns-fixtures.test.mjs',
           'tests/detect-antipatterns-browser.test.mjs',
         ],
