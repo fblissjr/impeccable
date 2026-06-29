@@ -3,7 +3,11 @@
 Source of truth for what each AI coding harness supports in terms of agent skills.
 Used to inform provider configs in `scripts/lib/transformers/providers.js`.
 
-Last verified: 2026-04-28
+Last verified: 2026-04-28 (subagent landscape spot-checked 2026-06-28)
+
+> This file is point-in-time. Capabilities move fast; verify live before relying
+> on any "only X supports Y" claim. Notably, the subagent table below lists
+> Impeccable's *emission targets*, not the support landscape (see its note).
 
 ## Official Documentation
 
@@ -83,14 +87,29 @@ Notes:
 
 All harnesses support the `{skill-name}/SKILL.md` directory structure with optional `reference/`, `scripts/`, and `assets/` subdirectories.
 
-## Native Subagent Directory Structure
+## Native Subagent Directory Structure (Impeccable emission targets)
+
+> **Scope:** this table is **where Impeccable emits native subagent files**, not a
+> map of which harnesses support subagents. Subagents are broadly supported now:
+> Cursor (auto-delegation + `/name` invocation, https://cursor.com/docs/subagents),
+> GitHub Copilot, and Google Antigravity ship them too. Impeccable only writes
+> native files where there is a stable, documented on-disk format to target.
 
 | Harness | Native directory | File format |
 |---------|------------------|-------------|
 | Claude Code | `.claude/agents/` (installed plugin) | Markdown with YAML frontmatter |
 | Codex CLI | `<skill>/agents/` (nested, auto-discovered) | TOML |
 
-Impeccable keeps canonical agent prompts under `skill/agents/` and emits provider-native files only for harnesses with documented subagent formats. Claude reads its agents from the installed plugin; Codex auto-discovers the TOML bundled inside the installed skill's own `agents/` folder, so the normal skills install carries it with no separate sidecar.
+Impeccable keeps canonical agent prompts under `skill/agents/` and emits provider-native files only for harnesses with a documented on-disk subagent format. Claude reads its agents from the installed plugin; Codex auto-discovers the TOML bundled inside the installed skill's own `agents/` folder, so the normal skills install carries it with no separate sidecar.
+
+**Spawn / permission model** (matters more than directory support when building skills):
+
+| Harness | Who can spawn a subagent |
+|---------|--------------------------|
+| Claude Code | Programmatically, from within the skill/agent flow. |
+| Codex CLI | Only if the user has allowed sub-agents / parallel work; otherwise the skill must ask once, then stop (see `skill/reference/critique.md` `<codex>` gate). |
+| Cursor | Agent-chosen: auto-delegated by the Agent, or user-invoked via `/name`. Not reliably skill-spawnable. |
+| Others | Varies; treat as unavailable unless verified, and degrade loudly. |
 
 ## Placeholder / Variable Substitution
 
