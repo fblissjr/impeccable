@@ -1,5 +1,14 @@
 # Project Instructions for Claude
 
+> **PERSONAL FORK (`fblissjr/impeccable`). Intentional deviations from upstream; do not "fix" or rebuild them away.**
+> `plugin/` is generated from `skill/` by `scripts/build.js`, but this fork carries two overrides applied directly in `plugin/` (not in the source, not reproducible by the build):
+> 1. `plugin/hooks/hooks.json` is deleted, so a marketplace `/plugin install` never registers the PostToolUse detector hook. On-demand `/impeccable audit` is unaffected.
+> 2. `plugin/skills/impeccable/SKILL.md` references bundled scripts as `${CLAUDE_SKILL_DIR}/scripts/...` (not `.claude/skills/impeccable/scripts/...`), so they resolve from a marketplace install.
+>
+> Do NOT run `scripts/build.js` or `bun run build` in this fork: it regenerates `plugin/` (recreating `hooks.json` and the project-relative paths) and reverts both overrides. On `git rebase upstream/main`, if upstream's regenerated provider output changes these files, re-apply: delete `plugin/hooks/hooks.json` and re-point the SKILL.md script paths to `${CLAUDE_SKILL_DIR}/scripts`.
+>
+> Telemetry: the daily version-check ping in `context.mjs` is off when `IMPECCABLE_NO_UPDATE_CHECK=1` is set (add `export IMPECCABLE_NO_UPDATE_CHECK=1` to `~/.bashrc` and `~/.zshrc`).
+
 ## Architecture (v3.0+)
 
 There is **one** user-invocable skill, `impeccable`, with **23 commands** underneath it. Users type `/impeccable polish`, `/impeccable audit`, etc. The skill is defined in `skill/`:

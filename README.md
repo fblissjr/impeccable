@@ -2,6 +2,17 @@
 
 Design guidance for AI coding agents. 1 skill, 23 commands, live browser iteration, and 44 deterministic detector rules for AI-generated frontend design.
 
+> **Personal fork (`fblissjr/impeccable`), not upstream.** A hook-free,
+> marketplace-installable build. Two changes from `pbakaus/impeccable`: the
+> edit-time detector hook is removed (on-demand `/impeccable audit` still works),
+> and the skill's script paths use `${CLAUDE_SKILL_DIR}` so they resolve from a
+> plugin-marketplace install, not only a project-local one. Install with
+> `/plugin marketplace add fblissjr/impeccable` then `/plugin install impeccable@impeccable`.
+> Silence the daily version-check ping by adding `export IMPECCABLE_NO_UPDATE_CHECK=1`
+> to `~/.bashrc` and `~/.zshrc`. These two changes are overrides committed in `plugin/`;
+> do not run `scripts/build.js` here (it regenerates `plugin/` and reverts them).
+> Sync upstream with `git fetch upstream && git rebase upstream/main`.
+
 > **Quick start:** From your project root, run `npx impeccable install`, then run `/impeccable init` inside your AI coding tool. Full docs: [impeccable.style](https://impeccable.style).
 
 ## Why Impeccable?
