@@ -47,6 +47,8 @@ fi
 
 echo "merging $UPSTREAM_REF ($(git rev-list --count "HEAD..$UPSTREAM_REF") new commit(s))..."
 
+BEFORE="$(git rev-parse HEAD)"
+
 # --- merge (tolerate the expected conflict) --------------------------------
 set +e
 git merge --no-ff --no-commit "$UPSTREAM_REF" >/dev/null 2>&1
@@ -83,6 +85,14 @@ if grep -q '\.claude/skills/impeccable/scripts/' "$SKILL" 2>/dev/null; then
   echo "verify FAILED: $SKILL still has project-relative script paths" >&2; FAIL=1
 fi
 [ "$FAIL" -eq 1 ] && exit 3
+
+# --- sync deps if the merge moved package.json / bun.lock ------------------
+# (compare the merged tree against the pre-merge HEAD; covers both commit and
+# --no-commit modes since it diffs against a SHA, not the index.)
+if [ -n "$(git diff --name-only "$BEFORE" -- package.json bun.lock)" ]; then
+  echo "package.json/bun.lock changed upstream; running bun install..."
+  bun install
+fi
 
 # --- finish ----------------------------------------------------------------
 if [ "$DO_COMMIT" -eq 0 ]; then
