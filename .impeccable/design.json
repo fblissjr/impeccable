@@ -174,15 +174,15 @@
     "typographyMeta": {
       "wordmark": {
         "displayName": "Wordmark",
-        "purpose": "IMPECCABLE lockup only. Solid Alumni Sans, not pinstripe."
+        "purpose": "IMPECCABLE lockup only. Alumni Sans at weight 400."
       },
       "display": {
         "displayName": "Display",
-        "purpose": "Hero h1. Alumni Sans Pinstripe, weight 300."
+        "purpose": "Hero h1. Alumni Sans, weight 100."
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "Section h2. Pinstripe at weight 600, heavier than display."
+        "purpose": "Section h2. Alumni Sans at weight 300, heavier than display."
       },
       "title": {
         "displayName": "Title",
@@ -360,12 +360,12 @@
       {
         "name": "The Weight-Inversion Rule",
         "section": "typography",
-        "body": "Section h2s read heavier (600) than the hero h1 (300). This is deliberate: the hero is elegant and thin so the page can breathe; section anchors carry more weight to ground each block."
+        "body": "Section h2s read heavier (300) than the hero h1 (100). This is deliberate: the hero is elegant and thin so the page can breathe; section anchors carry more weight to ground each block."
       },
       {
         "name": "The Two-Face Rule",
         "section": "typography",
-        "body": "Display sizes use Alumni Sans Pinstripe. Anything sized below 1.2rem uses Albert Sans. Pinstripe at small sizes loses its identity and reads as a bad rendering."
+        "body": "Display sizes use Alumni Sans — thin (100) for the h1, heavier (300) for h2s. Anything sized below 1.2rem uses Albert Sans. The thin display cut reads too light at small sizes, so it never carries body or UI text."
       },
       {
         "name": "The Tracked Labels Are Short Rule",

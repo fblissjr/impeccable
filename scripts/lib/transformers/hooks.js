@@ -22,7 +22,7 @@ const TIMEOUT_SECONDS = 5;
 const STATUS_MESSAGE = 'Checking UI changes';
 const CLAUDE_PROJECT_HOOK = '${CLAUDE_PROJECT_DIR}/.claude/skills/impeccable/scripts/hook.mjs';
 const CLAUDE_PLUGIN_HOOK = '${CLAUDE_PLUGIN_ROOT}/skills/impeccable/scripts/hook.mjs';
-const CODEX_PROJECT_HOOK = '$(git rev-parse --show-toplevel)/.agents/skills/impeccable/scripts/hook.mjs';
+const CODEX_PROJECT_HOOK = '.agents/skills/impeccable/scripts/hook.mjs';
 const CURSOR_BEFORE_EDIT_SCRIPT = '.cursor/skills/impeccable/scripts/hook-before-edit.mjs';
 const GITHUB_PROJECT_HOOK = '$(git rev-parse --show-toplevel)/.github/skills/impeccable/scripts/hook.mjs';
 
@@ -47,13 +47,14 @@ export function buildClaudeSettingsManifest() {
   };
 }
 
-// Plugin-packaged variant of the Claude hook. Same schema as the settings.json
-// manifest (Claude Code reads an identical `hooks` object from a plugin's
-// `hooks/hooks.json`), but the command resolves relative to ${CLAUDE_PLUGIN_ROOT}
-// so it does not depend on the skill being copied into `.claude/skills/`.
+// Plugin-packaged variant of the Claude hook. Claude Code reads the `hooks`
+// object from a plugin's `hooks/hooks.json`, and the command resolves relative
+// to ${CLAUDE_PLUGIN_ROOT} so it does not depend on the skill being copied into
+// `.claude/skills/`. No top-level `description`: Codex also loads bundled plugin
+// hooks from `hooks/hooks.json` and its strict parser rejects any field other
+// than `hooks`, failing the whole manifest (issue #330).
 export function buildClaudePluginHooksManifest() {
   return {
-    description: 'Impeccable design detector: runs after Edit/Write/MultiEdit on UI files and surfaces findings as system reminders.',
     hooks: {
       PostToolUse: [
         {
@@ -74,7 +75,6 @@ export function buildClaudePluginHooksManifest() {
 
 export function buildCodexHooksManifest() {
   return {
-    description: 'Impeccable design detector: runs after Edit/Write/apply_patch on UI files and surfaces findings as system reminders.',
     hooks: {
       PostToolUse: [
         {

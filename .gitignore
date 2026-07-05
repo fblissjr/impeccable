@@ -40,7 +40,10 @@ Thumbs.db
 # Impeccable-owned project files are split: generated sidecars/config may be
 # tracked, but runtime recovery state and local assets should stay local.
 .impeccable/live/server.json
-.impeccable/hook.cache.json
+# Ephemeral hook cache/state, at the project root and inside generated harness
+# skill dirs (**/skills/impeccable/scripts/.impeccable/). Anchored patterns
+# would miss the nested copies the build/hook writes.
+**/.impeccable/hook.cache.json
 .impeccable/live/sessions/
 .impeccable/live/previews/
 .impeccable/live/annotations/
@@ -52,7 +55,7 @@ Thumbs.db
 .impeccable/live/deferred-svelte-component-accepts.json
 .impeccable/history/
 .impeccable/config.local.json
-.impeccable/hook.pending.json
+**/.impeccable/hook.pending.json
 .impeccable/provider-smoke/
 src/__impeccable_provider_smoke_*.html
 # Per-run critique snapshots are local artifacts. ignore.md (also under

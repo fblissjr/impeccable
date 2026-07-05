@@ -180,7 +180,7 @@
   display: block;
   color: var(--ks-kinpaku);
   font-family: var(--ks-font-display);
-  font-weight: 300;
+  font-weight: 100;
   font-size: clamp(3.2rem, 7.2vw, 5.6rem);
   line-height: 1;
   letter-spacing: 0.22em;

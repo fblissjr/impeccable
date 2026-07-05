@@ -200,7 +200,7 @@
 
 .home-kinpaku .section-title {
   font-family: var(--ks-font-display);
-  font-weight: 600;
+  font-weight: var(--ks-type-headline-weight);
   font-size: clamp(2.6rem, 4vw, 3.4rem);
   line-height: 1.04;
   color: var(--ks-champagne);
@@ -1020,7 +1020,7 @@
   color: var(--ks-kinpaku);
   font-family: var(--ks-font-display);
   font-size: 4.2rem;
-  font-weight: 300;
+  font-weight: 100;
   letter-spacing: 0;
 }
 

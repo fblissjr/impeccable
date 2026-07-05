@@ -82,7 +82,7 @@
   color: var(--ks-champagne);
   font-family: var(--ks-font-display);
   font-size: clamp(2.2rem, 3.6vw, 3rem);
-  font-weight: 600;
+  font-weight: var(--ks-type-headline-weight);
   line-height: 1.06;
   letter-spacing: -0.005em;
 }
@@ -1007,7 +1007,7 @@
 }
 
 /* The legacy display face was italic serif; the kinpaku display face
-   (Alumni Sans Pinstripe) reads wrong synthesized-italic, so reset it on
+   (Alumni Sans) renders wrong as synthesized italic, so reset it on
    the headings the base stylesheet set to italic. */
 .kinpaku-surface .sub-page-title,
 .kinpaku-surface .prose h1,

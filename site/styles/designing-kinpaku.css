@@ -4,7 +4,7 @@
    Overrides sub-pages.css + docs-visuals.css for the long-form "Designing
    with Impeccable" walkthrough. The existing markup is unchanged; this file
    restyles every block to the kinpaku brand: dark lacquer surface, gold +
-   verdigris accents, Alumni Sans Pinstripe display, Albert Sans body.
+   verdigris accents, Alumni Sans display, Albert Sans body.
 
    Structure of this file mirrors the page itself:
      1. Page scope + base
@@ -198,7 +198,7 @@
   text-wrap: balance;
   max-width: none;
   /* "Impeccable" at the display token's 3.4rem minimum is 270px+ in the
-     narrow Pinstripe face and overflows a 360px viewport. Allow break-word
+     narrow Alumni Sans face and overflows a 360px viewport. Allow break-word
      as a safety net so the title never blows out of its container. */
   word-break: break-word;
   overflow-wrap: anywhere;
@@ -287,8 +287,8 @@
 
 .designing-kinpaku .designing-loop-name {
   color: var(--ks-champagne);
-  /* Pinstripe is single-weight and reads broken at ~1.5–2rem; wordmark
-     carries real stroke weight at compass-label scale (cf. iterate-name). */
+  /* The thin display cut reads too light at compass-label scale (~1.5–2rem);
+     the wordmark token is the same face at weight 400+ (cf. iterate-name). */
   font-family: var(--ks-font-wordmark);
   font-weight: 600;
   font-size: clamp(1.5rem, 2.2vw, 2rem);
@@ -806,9 +806,9 @@
   color: var(--ks-kinpaku);
 }
 
-/* Subsection h3s use Albert Sans, not the Pinstripe display face. DESIGN.md
+/* Subsection h3s use Albert Sans, not the Alumni Sans display face. DESIGN.md
    reserves the display face for the hero h1 and section h2s; at h3 sizes the
-   thin Pinstripe loses its identity and reads as a broken render. */
+   thin display cut loses presence and reads too light. */
 .designing-kinpaku .designing-iterate-name {
   color: var(--ks-champagne);
   font-family: var(--ks-font);
@@ -1427,8 +1427,8 @@
   font-weight: 600;
 }
 
-/* The brand mock title used the pinstripe display face at ~1.6rem, which reads
-   broken/washed at that size (Two-Face rule); use the clean body face. */
+/* The brand mock title used the Alumni Sans display face at ~1.6rem, where the
+   thin cut reads too light at that size (Two-Face rule); use the clean body face. */
 .designing-kinpaku .designing-lane-mock-title {
   font-family: var(--ks-font);
   font-weight: 500;
@@ -1612,7 +1612,7 @@
 .designing-kinpaku .designing-cta-card-title {
   color: var(--ks-champagne);
   font-family: var(--ks-font-display);
-  font-weight: 300;
+  font-weight: 100;
   font-size: clamp(1.8rem, 3vw, 2.4rem);
   line-height: 1.1;
   margin: 0;

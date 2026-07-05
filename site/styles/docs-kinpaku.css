@@ -632,7 +632,7 @@ html.light .docs-kinpaku {
 .docs-kinpaku .docs-live-target-title {
   font-family: var(--ks-font-display);
   font-style: normal;
-  font-weight: 600;
+  font-weight: var(--ks-type-headline-weight);
   font-size: 1.4rem;
   line-height: 1.15;
   color: var(--ks-champagne);
@@ -1200,7 +1200,7 @@ html.light .docs-kinpaku {
 }
 
 /* h2/h3 follow the DESIGN.md type scale exactly:
-   - h2 (Headline): Alumni Sans Pinstripe, clamp 2.6-3.4rem, weight 600
+   - h2 (Headline): Alumni Sans, clamp 2.6-3.4rem, weight 600
    - h3 (Title):    Albert Sans,           1.18rem,            weight 500
    - h4:            Albert Sans,           1rem,               weight 600 (utility)
 */

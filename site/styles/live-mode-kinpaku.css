@@ -338,7 +338,7 @@
 .live-mode-kinpaku .live-demo-card--v1 h3 {
   font-family: var(--ks-font-display);
   font-style: normal;
-  font-weight: 600;
+  font-weight: var(--ks-type-headline-weight);
   color: var(--ks-champagne);
 }
 
@@ -548,8 +548,8 @@
   background: var(--ks-lacquer-raised);
   border: 1.5px solid var(--ks-kinpaku);
   color: var(--ks-champagne);
-  /* Pinstripe display font loses legibility below ~1.2rem (Two-Face Rule).
-     The mock renders at 12px, so force the body face here. */
+  /* The thin Alumni Sans display cut loses legibility below ~1.2rem (Two-Face
+     Rule). The mock renders at 12px, so force the body face here. */
   font-family: var(--ks-font);
   font-style: normal;
   font-weight: 500;

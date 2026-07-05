@@ -82,20 +82,19 @@
 	--ks-code-cmd:        var(--ks-kinpaku);     /* code that's a command link */
 
 	/* ============================================================
-	   Typography — three faces.
-	   - --ks-font-display: Alumni Sans Pinstripe. Pinstripe horizontal
-	     strikes feel futuristic and editorial at display size; used for
-	     the hero h1 and section h2s. Single-weight — font-weight is inert.
-	   - --ks-font-wordmark: solid Alumni Sans, the weightable sibling of
-	     the pinstripe. Same letterforms, but carries real weight in the
-	     brand lockup where the hairline pinstripe reads too thin.
+	   Typography — two faces.
+	   - --ks-font-display: Alumni Sans. A weightable humanist grotesque;
+	     the hero h1 runs at a thin hairline (100) for elegance, section
+	     h2s at a heavier cut (300) to anchor each block.
+	   - --ks-font-wordmark: Alumni Sans, same face as display, held at
+	     weight 400 for the brand lockup.
 	   - --ks-font: Albert Sans. Quiet geometric humanist, used for body
-	     and UI text. Pairs cleanly with the pinstripe display without
+	     and UI text. Pairs cleanly with the Alumni Sans display without
 	     competing.
 	   All loaded via Base.astro's Google Fonts link.
 	   ============================================================ */
-	--ks-font-display:  "Alumni Sans Pinstripe", "Albert Sans", Arial, sans-serif;
-	--ks-font-wordmark: "Alumni Sans", "Alumni Sans Pinstripe", "Albert Sans", Arial, sans-serif;
+	--ks-font-display:  "Alumni Sans", "Albert Sans", Arial, sans-serif;
+	--ks-font-wordmark: "Alumni Sans", "Albert Sans", Arial, sans-serif;
 	--ks-font:          "Albert Sans", "Avenir Next", "Helvetica Neue", Arial, system-ui, sans-serif;
 	--ks-mono:          "SFMono-Regular", "Roboto Mono", "JetBrains Mono", Consolas, monospace;
 
@@ -103,19 +102,19 @@
 	   Type scale. These are the actual sizes the homepage ships with —
 	   new pages should read them via var(...) rather than hand-typing.
 	   The display vs headline weight split is deliberate: the hero h1
-	   reads thin (300) for elegance; section h2s read heavier (600) to
+	   reads thin (100) for elegance; section h2s read heavier (300) to
 	   anchor each block. Section h2s look heavier than the h1 on purpose.
 	   ============================================================ */
 
 	/* Display — hero h1. */
 	--ks-type-display-size:   clamp(3.4rem, 6.5vw, 5.6rem);
-	--ks-type-display-weight: 300;
+	--ks-type-display-weight: 100;
 	--ks-type-display-line:   1.02;
 	--ks-type-display-track:  -0.01em;
 
 	/* Headline — section h2. Heavier than display. */
 	--ks-type-headline-size:   clamp(2.6rem, 4vw, 3.4rem);
-	--ks-type-headline-weight: 600;
+	--ks-type-headline-weight: 300;
 	--ks-type-headline-line:   1.04;
 
 	/* Title — card and panel headings (h3). */

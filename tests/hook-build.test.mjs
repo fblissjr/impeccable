@@ -49,6 +49,7 @@ describe('hook manifest builders', () => {
 
   it('builds Codex project-local hooks for the real detector hook', () => {
     const manifest = buildCodexHooksManifest();
+    assert.equal(manifest.description, undefined);
     const group = manifest.hooks.PostToolUse[0];
     const handler = group.hooks[0];
 
@@ -57,7 +58,7 @@ describe('hook manifest builders', () => {
     assert.equal(handler.timeout, 5);
     assert.equal(handler.statusMessage, 'Checking UI changes');
     expectCommand(handler.command, '.agents/skills/impeccable/scripts/hook.mjs');
-    assert.ok(handler.command.includes('git rev-parse --show-toplevel'));
+    assert.ok(!handler.command.includes('git rev-parse --show-toplevel'));
     assert.ok(!handler.command.includes('${PLUGIN_ROOT}'));
     assert.equal(manifest.hooks.SessionStart, undefined);
   });
@@ -196,6 +197,9 @@ describe('generated hook artifacts in repo', () => {
 
     const manifest = readJson('plugin/hooks/hooks.json');
     assert.deepEqual(manifest, buildClaudePluginHooksManifest());
+    // Codex loads bundled plugin hooks from this same file and rejects any
+    // top-level field other than `hooks` (issue #330).
+    assert.equal(manifest.description, undefined);
 
     const handler = manifest.hooks.PostToolUse[0].hooks[0];
     assert.equal(manifest.hooks.PostToolUse[0].matcher, 'Edit|Write|MultiEdit');

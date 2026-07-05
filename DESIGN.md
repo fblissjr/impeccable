@@ -104,24 +104,24 @@ colors:
 
 typography:
   wordmark:
-    # Solid Alumni Sans (token --ks-font-wordmark), the weightable sibling of
-    # the pinstripe display face. The pinstripe itself is single-weight and
-    # reads too thin in the small lockup, so the wordmark uses the solid cut.
-    fontFamily: "Alumni Sans, Alumni Sans Pinstripe, Albert Sans, Arial, sans-serif"
+    # Alumni Sans (token --ks-font-wordmark), the same face as display, held
+    # at weight 400 for the small brand lockup where the thin display cut
+    # would read too light.
+    fontFamily: "Alumni Sans, Albert Sans, Arial, sans-serif"
     fontSize: "1.3rem"
     fontWeight: 400
     letterSpacing: "0.15em"
     lineHeight: 1
   display:
-    fontFamily: "Alumni Sans Pinstripe, Albert Sans, Arial, sans-serif"
+    fontFamily: "Alumni Sans, Albert Sans, Arial, sans-serif"
     fontSize: "clamp(3.4rem, 6.5vw, 5.6rem)"
-    fontWeight: 300
+    fontWeight: 100
     letterSpacing: "-0.01em"
     lineHeight: 1.02
   headline:
-    fontFamily: "Alumni Sans Pinstripe, Albert Sans, Arial, sans-serif"
+    fontFamily: "Alumni Sans, Albert Sans, Arial, sans-serif"
     fontSize: "clamp(2.6rem, 4vw, 3.4rem)"
-    fontWeight: 600
+    fontWeight: 300
     letterSpacing: "0"
     lineHeight: 1.04
   title:
@@ -262,7 +262,7 @@ Every class below is a global primitive. Drop it on any element on any page usin
 - `.ks-section` — page-level section container, 1320px max-width, kit gutters.
 - `.ks-section-head` — the section header block.
 - `.ks-section-eyebrow` — small mono eyebrow above the h2 (optional).
-- `.ks-section-head h2` — auto-styles any h2 inside `.ks-section-head` to the section title scale (weight 600, kit display family).
+- `.ks-section-head h2` — auto-styles any h2 inside `.ks-section-head` to the section title scale (weight 300, kit display family).
 - `.ks-section-sub` — subhead paragraph below the h2.
 - `.ks-subsection` — nested grouping inside a section.
 - `.ks-subsection-label` — small mono label above a subsection's content.
@@ -372,19 +372,21 @@ Do not hand-type oklch values or font sizes in page CSS. If a value isn't in the
 
 **The OKLCH-Only Rule.** New colors are declared in OKLCH. Hex appears only inside third-party examples or imported assets.
 
+**The Gold-By-Size-On-Paper Rule (light mode).** On paper, gold usage is gated by size, not banned. **Large display accents stay gold** — the hero's gold accent word reads beautifully at display scale (see the Designing hero: "with Impeccable" in kinpaku gold on paper). But **at body and label sizes gold fails contrast on the bright ground, so it is never used for small accent text on paper.** There, the roles swap to verdigris: links, active nav, and inline command code use `--ks-link-on-paper` (patina-deep, `oklch(49% 0.08 188)`) for contrast, and small labels fall back to muted ink. Verdigris also carries state on paper (active nav, "you are here"), consistent with the Patina Has Meaning rule. Gold otherwise stays on fills and marks (logo, CTA fills, nodes, active rules). Reach for the light-mode tokens (`--ks-link-on-paper`, `--ks-nav-active`, the `light-*` surfaces) when building on paper — the token list below is dark-first, so a naive read pulls you toward gold *body* text that the light theme forbids.
+
 ## 4. Typography: Two faces, weight inversion at the top
 
-**Display font:** Alumni Sans Pinstripe, Albert Sans, Arial, sans-serif (pinstripe horizontal strikes carry the brand at display sizes)
+**Display font:** Alumni Sans, Albert Sans, Arial, sans-serif (a thin hairline cut carries the brand at display sizes)
 **Body and UI font:** Albert Sans, Avenir Next, Helvetica Neue, Arial, system-ui, sans-serif
 **Mono font:** SFMono-Regular, Roboto Mono, Consolas, monospace
 
-The voice is geometric and restrained. The pinstripe display face is reserved for the hero h1 and section h2s; the brand wordmark uses its solid sibling (Alumni Sans). Everything else (body, UI labels, controls, code) uses Albert Sans. The faces pair cleanly because they share humanist proportions without fighting for attention.
+The voice is geometric and restrained. The Alumni Sans display face is reserved for the hero h1 and section h2s; the brand wordmark uses the same face at a heavier weight. Everything else (body, UI labels, controls, code) uses Albert Sans. The faces pair cleanly because they share humanist proportions without fighting for attention.
 
 ### Hierarchy
 
-- **Wordmark**: solid Alumni Sans (`--ks-font-wordmark`), weight 400, uppercase, `1.3rem`, letter-spacing `0.15em`. Brand lockup only. The pinstripe sibling reads too thin at lockup size, so the wordmark uses the weightable cut.
-- **Display · h1**: Alumni Sans Pinstripe, `clamp(3.4rem, 6.5vw, 5.6rem)`, **weight 300**, line-height 1.02, letter-spacing `-0.01em`. Hero and major statements.
-- **Headline · h2**: Alumni Sans Pinstripe, `clamp(2.6rem, 4vw, 3.4rem)`, **weight 600**, line-height 1.04. Section titles.
+- **Wordmark**: Alumni Sans (`--ks-font-wordmark`), weight 400, uppercase, `1.3rem`, letter-spacing `0.15em`. Brand lockup only. The thin display cut reads too light at lockup size, so the wordmark holds weight 400.
+- **Display · h1**: Alumni Sans, `clamp(3.4rem, 6.5vw, 5.6rem)`, **weight 100**, line-height 1.02, letter-spacing `-0.01em`. Hero and major statements.
+- **Headline · h2**: Alumni Sans, `clamp(2.6rem, 4vw, 3.4rem)`, **weight 300**, line-height 1.04. Section titles.
 - **Title · h3**: Albert Sans, `1.18rem`, weight 500, line-height 1.35. Component and panel headings.
 - **Body**: Albert Sans, `1.02rem`, weight 400, line-height 1.8. Long copy on dark surfaces needs air.
 - **Eyebrow**: Mono, `0.7rem`, weight 500, uppercase, letter-spacing `0.18em`. Small markers above titles.
@@ -392,9 +394,9 @@ The voice is geometric and restrained. The pinstripe display face is reserved fo
 
 ### Typography Rules
 
-**The Weight-Inversion Rule.** Section h2s read heavier (600) than the hero h1 (300). This is deliberate: the hero is elegant and thin so the page can breathe; section anchors carry more weight to ground each block. Do not normalize the two weights.
+**The Weight-Inversion Rule.** Section h2s read heavier (300) than the hero h1 (100). This is deliberate: the hero is elegant and thin so the page can breathe; section anchors carry more weight to ground each block. Do not normalize the two weights.
 
-**The Two-Face Rule.** Display sizes use Alumni Sans Pinstripe. Anything sized below `1.2rem` uses Albert Sans. Pinstripe at small sizes loses its identity and reads as a bad rendering.
+**The Two-Face Rule.** Display sizes use Alumni Sans — thin (100) for the h1, heavier (300) for h2s. Anything sized below `1.2rem` uses Albert Sans. The thin display cut reads too light at small sizes, so it never carries body or UI text.
 
 **Tracked Labels Are Short Rule.** Tracked uppercase labels are for short system markers. Do not write full sentences in tracked caps.
 
@@ -444,7 +446,7 @@ The command table uses dark category cells. Kinpaku covers Create, Refine, and S
 
 ### DESIGN.md Panel
 
-The DESIGN.md visualization must show kinpaku as the primary color, patina as the secondary color, Alumni Sans Pinstripe and Albert Sans as the display and body families, and dark component samples. Magenta is not representative of the current system.
+The DESIGN.md visualization must show kinpaku as the primary color, patina as the secondary color, Alumni Sans and Albert Sans as the display and body families, and dark component samples. Magenta is not representative of the current system.
 
 ### Dividers and Material Accents
 
@@ -489,7 +491,7 @@ The global bottom bar and the contextual bar (configure / cycling / accept) shar
 - Do not use italic serif display typography.
 - Do not use purple gradients, neon cyan fields, glassmorphism, or generic AI-tool glow.
 - Do not put gold texture under long text.
-- Do not use beige, paper, or cream as the page ground.
+- Do not use beige, paper, or cream as the page ground **in the default (dark) theme**. (Light mode intentionally uses a warm paper ground — see the Gold-Is-A-Mark-On-Paper rule.)
 - Do not add decorative calibration marks that do not align with real content.
 - Do not use wide rounded cards or nested cards.
 - Do not use pure black or pure white.

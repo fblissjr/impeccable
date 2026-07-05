@@ -92,7 +92,7 @@
   margin: 0;
   color: var(--ks-champagne);
   font-family: var(--ks-font-display);
-  font-weight: 300;
+  font-weight: 100;
   font-size: clamp(3.4rem, 6.5vw, 5.6rem);
   line-height: 1.02;
   letter-spacing: -0.01em;
@@ -265,7 +265,7 @@
      forced the grid track wider than the viewport. Drop it on mobile. */
   .hero-rebuild-container { padding-left: 0; padding-right: 0; }
   /* Title keeps its design-system clamp (floors at 3.4rem ≈ 54px here): the
-     Pinstripe display face is condensed, so "interfaces" stays well within a
+     Alumni Sans display face is narrow, so "interfaces" stays well within a
      320px+ viewport. No mobile shrink — at 54px against 16.8px body it holds a
      ~3.2× hero hierarchy; shrinking it made the heading read smaller than body. */
   .hero-rebuild-actions { flex-direction: column; align-items: stretch; }
@@ -305,7 +305,7 @@
   margin: 0;
   color: var(--ks-champagne);
   font-family: var(--ks-font-display);
-  font-weight: 600;
+  font-weight: var(--ks-type-headline-weight);
   font-size: clamp(2.6rem, 4vw, 3.4rem);
   line-height: 1.04;
   letter-spacing: -0.005em;
@@ -649,7 +649,7 @@
   margin: 0;
   color: var(--card-fg-strong);
   font-family: var(--ks-font-display);
-  font-weight: 600;
+  font-weight: var(--ks-type-headline-weight);
   font-size: clamp(2.6rem, 4vw, 3.4rem);
   line-height: 1.04;
 }
@@ -2017,7 +2017,7 @@ svg.downloads-rebuild-tab-logo {
 .live-how-title {
   margin: 0;
   font-family: var(--ks-font-display);
-  font-weight: 600;
+  font-weight: var(--ks-type-headline-weight);
   font-size: 1.18rem;
   color: var(--ks-champagne);
 }

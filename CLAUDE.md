@@ -240,10 +240,11 @@ There are three independently versioned components. Only bump the one(s) that ac
 - `extension/manifest.json` → `version`
 - Bump when: extension code changes (`extension/`)
 
-**Website changelog** (`site/pages/index.astro`):
-- Hero version link text + new changelog entry in the changelog section
-- Update for user-facing changes only, not internal build/tooling details
-- Use the most prominent version that changed (skills version is usually the right one)
+**Website changelog** (`site/pages/changelog.astro`):
+- Add a new `<article>` entry at the top of the relevant component's group, and move the `cf-entry--current` class + `Current` badge onto it (off the previous newest skill entry). The component is derived from the entry `id` prefix: `cli-*`, `ext-*`, else skill.
+- Keep it concise and sell the release: a short `cf-entry-lead` that frames what shipped, then a handful of tight `<li>` items. Lead with the most compelling feature.
+- User-facing only. Every item must be something an impeccable user would notice or act on (a new command behavior, rule, or fix). Leave out internal build/tooling/refactor details, dependency bumps, and generated-output syncs.
+- Prose rules in `docs/STYLE.md` apply (the validator scans this file): no em dashes, no banned words, no AI-tell cadence.
 
 After bumping, see **Releases** below for how to tag and publish.
 
@@ -254,7 +255,7 @@ GitHub releases are tagged per-component, not per-version, since the three compo
 Workflow for any component:
 
 1. Bump the manifest version (see Versioning above).
-2. Add a changelog entry to `site/pages/index.astro`. Skill entries use a bare `vX.Y.Z` label; CLI and extension entries use the prefixed forms `CLI vX.Y.Z` and `Extension vX.Y.Z`. The release script extracts notes by matching this label, so the prefix matters.
+2. Add a changelog entry to `site/pages/changelog.astro` (see **Website changelog** above for placement and tone). Skill entries use a bare `vX.Y.Z` label; CLI and extension entries use the prefixed forms `CLI vX.Y.Z` and `Extension vX.Y.Z`. The release script extracts notes by matching this label, so the prefix matters.
 3. Commit and push to `main`.
 4. Run `bun run release:<skill|cli|ext>`. Preview first with `node scripts/release.mjs <component> --dry-run`.
 

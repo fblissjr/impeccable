@@ -99,8 +99,7 @@ function createFakeUniversalBundle(root, providers = ['.claude', '.agents', '.cu
   if (providers.includes('.agents')) {
     mkdirSync(join(bundleRoot, '.codex'), { recursive: true });
     writeFileSync(join(bundleRoot, '.codex', 'hooks.json'), JSON.stringify({
-      description: 'fresh codex hook',
-      hooks: { PostToolUse: [{ matcher: 'apply_patch', hooks: [{ type: 'command', command: 'node "$(git rev-parse --show-toplevel)/.agents/skills/impeccable/scripts/hook.mjs"' }] }] },
+      hooks: { PostToolUse: [{ matcher: 'apply_patch', hooks: [{ type: 'command', command: 'node ".agents/skills/impeccable/scripts/hook.mjs"' }] }] },
     }, null, 2));
   }
   return bundleRoot;
