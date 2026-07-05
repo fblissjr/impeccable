@@ -7,7 +7,7 @@
 >
 > Do NOT run `scripts/build.js` or `bun run build` in this fork: it regenerates `plugin/` (recreating `hooks.json` and the project-relative paths) and reverts both overrides. On `git rebase upstream/main`, if upstream's regenerated provider output changes these files, re-apply: delete `plugin/hooks/hooks.json` and re-point the SKILL.md script paths to `${CLAUDE_SKILL_DIR}/scripts`.
 >
-> **Syncing upstream: run `scripts/sync-upstream.sh`.** It adds the `upstream` remote if missing, fetches, merges `upstream/main`, and re-applies both overrides deterministically (it does not build and does not push). If the merge hits a conflict other than the known `hooks.json` one, it stops and hands off for manual resolution.
+> **Syncing upstream: run `scripts/sync-upstream.sh`.** It adds the `upstream` remote if missing, fetches, merges `upstream/main`, re-applies both overrides deterministically, and runs `bun install` when the merge changes `package.json`/`bun.lock` (it does not build and does not push). If the merge hits a conflict other than the known `hooks.json` one, it stops and hands off for manual resolution.
 >
 > Telemetry: the daily version-check ping in `context.mjs` is off when `IMPECCABLE_NO_UPDATE_CHECK=1` is set (add `export IMPECCABLE_NO_UPDATE_CHECK=1` to `~/.bashrc` and `~/.zshrc`).
 
