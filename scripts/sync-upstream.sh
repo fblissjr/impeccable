@@ -77,14 +77,16 @@ if [ -n "$REMAINING" ]; then
 fi
 
 # --- verify the overrides actually took ------------------------------------
-FAIL=0
-if [ -f "$HOOKS" ]; then
-  echo "verify FAILED: $HOOKS still exists" >&2; FAIL=1
+# Positive invariant check: every SKILL.md script path must be rooted at
+# ${CLAUDE_SKILL_DIR}/. This catches an upstream restructure into a new path
+# form that the blanket rewrite above silently would not touch.
+if ! node scripts/check-fork-overrides.mjs; then
+  echo "" >&2
+  echo "Override verification failed after the merge — stopping before commit." >&2
+  echo "Upstream likely changed how SKILL.md references bundled scripts." >&2
+  echo "Fix the rewrite rule above, then re-run, or resolve by hand." >&2
+  exit 3
 fi
-if grep -q '\.claude/skills/impeccable/scripts/' "$SKILL" 2>/dev/null; then
-  echo "verify FAILED: $SKILL still has project-relative script paths" >&2; FAIL=1
-fi
-[ "$FAIL" -eq 1 ] && exit 3
 
 # --- sync deps if the merge moved package.json / bun.lock ------------------
 # (compare the merged tree against the pre-merge HEAD; covers both commit and

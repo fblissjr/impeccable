@@ -12,8 +12,9 @@ Design guidance for AI coding agents. 1 skill, 23 commands, live browser iterati
 > to `~/.bashrc` and `~/.zshrc`. These two changes are overrides committed in `plugin/`;
 > do not run `scripts/build.js` here (it regenerates `plugin/` and reverts them).
 > Sync upstream with `scripts/sync-upstream.sh`: it merges `upstream/main`,
-> re-applies both overrides, and runs `bun install` if the merge changed
-> dependencies. It never builds and never pushes.
+> re-applies both overrides, runs `bun install` if the merge changed
+> dependencies, and verifies the overrides held (`scripts/check-fork-overrides.mjs`)
+> before committing. It never builds and never pushes.
 
 > **Quick start:** From your project root, run `npx impeccable install`, then run `/impeccable init` inside your AI coding tool. Full docs: [impeccable.style](https://impeccable.style).
 

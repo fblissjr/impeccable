@@ -9,6 +9,8 @@
 >
 > **Syncing upstream: run `scripts/sync-upstream.sh`.** It adds the `upstream` remote if missing, fetches, merges `upstream/main`, re-applies both overrides deterministically, and runs `bun install` when the merge changes `package.json`/`bun.lock` (it does not build and does not push). If the merge hits a conflict other than the known `hooks.json` one, it stops and hands off for manual resolution.
 >
+> Before committing, the sync verifies both overrides via `scripts/check-fork-overrides.mjs` (run it standalone any time: `node scripts/check-fork-overrides.mjs`). It is a *positive* invariant check: it asserts `hooks.json` is absent and that **every** `scripts/` path in the plugin `SKILL.md` is rooted at `${CLAUDE_SKILL_DIR}/`. If upstream restructures those paths into a new form the blanket rewrite does not catch, the check fails loudly and names the offending line — that is the signal to update the rewrite rule in `sync-upstream.sh`.
+>
 > Telemetry: the daily version-check ping in `context.mjs` is off when `IMPECCABLE_NO_UPDATE_CHECK=1` is set (add `export IMPECCABLE_NO_UPDATE_CHECK=1` to `~/.bashrc` and `~/.zshrc`).
 
 ## Architecture (v3.0+)
