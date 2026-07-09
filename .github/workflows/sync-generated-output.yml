@@ -20,6 +20,12 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # PERSONAL FORK: `plugin` is intentionally omitted. `build:release`
+  # regenerates plugin/ and reverts both fork overrides (re-adds
+  # plugin/hooks/hooks.json, reverts the ${CLAUDE_SKILL_DIR} script paths,
+  # drops the preamble). plugin/ is managed by scripts/sync-upstream.sh here,
+  # not CI. Letting this workflow commit plugin/ clobbers the overrides on
+  # every source push. See scripts/check-fork-overrides.mjs for the invariants.
   GENERATED_PATHS: >-
     .agents
     .claude
@@ -33,7 +39,6 @@ env:
     .rovodev
     .trae
     .trae-cn
-    plugin
 
 jobs:
   sync:
