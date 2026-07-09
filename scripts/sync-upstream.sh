@@ -59,9 +59,51 @@ set -e
 git rm -f --ignore-unmatch "$HOOKS" >/dev/null 2>&1 || true
 rm -f "$HOOKS"
 
-# Override 2: normalize every project-relative script path back to the token.
-if [ -f "$SKILL" ]; then
+# Override 2: the fork's plugin SKILL.md is upstream's SKILL.md plus exactly two
+# deterministic transforms — (a) every bundled-script path rewritten to the
+# ${CLAUDE_SKILL_DIR}/ token, and (b) one fork-authored "Bundled scripts live in ..."
+# preamble paragraph. Resolving conflict markers in place is brittle (it breaks the
+# moment upstream rewrites a step region), so instead reconstruct the file from
+# upstream's content and re-derive both transforms. This is correct whether the
+# merge conflicted or merged clean, and it never leaves markers behind.
+SKILL_ANCHOR='You MUST do these steps before proceeding:'
+if git cat-file -e "$UPSTREAM_REF:$SKILL" 2>/dev/null; then
+  git show "$UPSTREAM_REF:$SKILL" > "$SKILL"
+
+  # (a) path token — normalize the project-relative form to ${CLAUDE_SKILL_DIR}/.
   perl -0pi -e 's{\.claude/skills/impeccable/scripts/}{\${CLAUDE_SKILL_DIR}/scripts/}g' "$SKILL"
+
+  # (b) preamble — insert after the Setup anchor line and its trailing blank, unless
+  # it's already present. Quoted heredoc: the ${...} token and backticks stay literal.
+  if ! grep -qF 'Bundled scripts live in' "$SKILL"; then
+    PREAMBLE_FILE="$(mktemp)"
+    cat > "$PREAMBLE_FILE" <<'PREAMBLE_EOF'
+**Bundled scripts live in `${CLAUDE_SKILL_DIR}/scripts/`** — that token resolves to this skill's own directory whether it's installed project-locally or via a plugin marketplace, so the commands below work regardless of the current working directory. If a `reference/*.md` doc writes a script path rooted at `.claude/skills/impeccable/`, treat it as `${CLAUDE_SKILL_DIR}/` instead (same script, install-correct path).
+PREAMBLE_EOF
+    # Slurp-mode insertion preserves the file's exact byte layout (including
+    # upstream's lack of a trailing newline). chomp is a no-op under -0777 ($/ is
+    # undef), so strip the preamble's trailing newline with a regex.
+    SKILL_ANCHOR="$SKILL_ANCHOR" PREAMBLE_FILE="$PREAMBLE_FILE" \
+    perl -0777 -i -pe '
+      BEGIN { local $/; open my $f, "<", $ENV{PREAMBLE_FILE} or die; $pre = <$f>; close $f; $pre =~ s/\n+\z//; }
+      s/(\Q$ENV{SKILL_ANCHOR}\E\n\n)/$1 . $pre . "\n\n"/e;
+    ' "$SKILL"
+    rm -f "$PREAMBLE_FILE"
+  fi
+
+  # If the preamble still isn't there, the anchor moved: hand off rather than ship a
+  # SKILL.md missing the fork override. (check-fork-overrides.mjs below is the backstop
+  # for the path token; this guards the preamble, which the check does not police.)
+  if ! grep -qF 'Bundled scripts live in' "$SKILL"; then
+    echo "" >&2
+    echo "Could not find the Setup anchor to insert the fork preamble in $SKILL." >&2
+    echo "Upstream likely reworded \"$SKILL_ANCHOR\"." >&2
+    echo "Insert the preamble by hand and update SKILL_ANCHOR in scripts/sync-upstream.sh," >&2
+    echo "then: node scripts/check-fork-overrides.mjs && git add $SKILL && git commit" >&2
+    echo "" >&2
+    exit 2
+  fi
+
   git add "$SKILL"
 fi
 
