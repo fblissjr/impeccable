@@ -10,8 +10,10 @@
 // Invariants:
 //   1. plugin/hooks/hooks.json does NOT exist.
 //   2. In plugin/skills/impeccable/SKILL.md, every `scripts/<file>` path
-//      reference is rooted at exactly `${CLAUDE_SKILL_DIR}/` — no other prefix
-//      (project-relative, ${CLAUDE_PROJECT_DIR}, bare, or anything new).
+//      reference is rooted at exactly `${CLAUDE_SKILL_DIR}/`, OR at the literal
+//      `<skill-base-dir>/` runtime-substitution placeholder upstream documents as
+//      the fallback for that same token — no other prefix (project-relative,
+//      ${CLAUDE_PROJECT_DIR}, bare, or anything new).
 //   3. SKILL.md still contains at least one `${CLAUDE_SKILL_DIR}/scripts/`
 //      reference. If it drops to zero, the scripts dir was likely renamed or
 //      the reference style changed structurally — a human should re-check the
@@ -27,7 +29,11 @@ import { execFileSync } from 'node:child_process';
 const ROOT = execFileSync('git', ['rev-parse', '--show-toplevel']).toString().trim();
 const HOOKS = 'plugin/hooks/hooks.json';
 const SKILL = 'plugin/skills/impeccable/SKILL.md';
-const WANT_PREFIX = '${CLAUDE_SKILL_DIR}/';
+// `${CLAUDE_SKILL_DIR}/` is the fork's canonical token. `<skill-base-dir>/` is the
+// literal placeholder upstream added as the runtime-resolved fallback for that same
+// directory (SKILL.md step 1); it is install-correct, not a hardcoded project path,
+// so the fork keeps it verbatim rather than forking the sentence.
+const WANT_PREFIXES = ['${CLAUDE_SKILL_DIR}/', '<skill-base-dir>/'];
 
 // A path token ending in `scripts/<file-or-glob>`, plus everything up to the
 // nearest boundary (whitespace, backtick, quote, paren) before `scripts/`.
@@ -49,12 +55,14 @@ if (!existsSync(`${ROOT}/${SKILL}`)) {
   lines.forEach((line, i) => {
     for (const m of line.matchAll(SCRIPT_REF)) {
       const prefix = m[1];
-      if (prefix === WANT_PREFIX) {
+      // rootedCount tracks the canonical token specifically (invariant 3): the
+      // `<skill-base-dir>/` fallback alone must never satisfy "the token is present".
+      if (prefix === '${CLAUDE_SKILL_DIR}/') {
         rootedCount++;
-      } else {
+      } else if (!WANT_PREFIXES.includes(prefix)) {
         problems.push(
           `${SKILL}:${i + 1}: script path "${m[0]}" is not rooted at ` +
-          `\${CLAUDE_SKILL_DIR}/ (prefix was "${prefix || '<none>'}"). ` +
+          `\${CLAUDE_SKILL_DIR}/ or <skill-base-dir>/ (prefix was "${prefix || '<none>'}"). ` +
           `The sync rewrite rule did not normalize it — upstream likely ` +
           `changed the path form; update scripts/sync-upstream.sh.`
         );
