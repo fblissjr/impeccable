@@ -123,21 +123,18 @@ fi
 # ${CLAUDE_SKILL_DIR}/. This catches an upstream restructure into a new path
 # form that the blanket rewrite above silently would not touch.
 #
-# Resolve a JS runtime rather than assuming bare `node`: interactive shells
-# often expose `node` only as an nvm/asdf lazy-load function, which is invisible
-# to this non-interactive script. `bun` is a real binary already required below
-# (bun install) and runs the .mjs check fine, so fall back to it.
-if command -v node >/dev/null 2>&1; then
-  JS_RUNTIME=node
-elif command -v bun >/dev/null 2>&1; then
-  JS_RUNTIME=bun
-else
-  echo "error: neither node nor bun found on PATH." >&2
-  echo "Load your node version manager (nvm/asdf) or install bun, then re-run." >&2
+# Run under `bun`, the repo's mandated JS runtime and a real binary on PATH.
+# Not bare `node`: interactive shells often expose `node` only as an nvm/asdf
+# lazy-load function, invisible to this non-interactive script (a bare `node`
+# call here dies with "command not found" and misreports it as an override
+# failure). bun runs the .mjs check identically and is already required below
+# for `bun install`.
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun not found on PATH. Install bun, then re-run." >&2
   exit 1
 fi
 
-if ! "$JS_RUNTIME" scripts/check-fork-overrides.mjs; then
+if ! bun scripts/check-fork-overrides.mjs; then
   echo "" >&2
   echo "Override verification failed after the merge — stopping before commit." >&2
   echo "Upstream likely changed how SKILL.md references bundled scripts." >&2

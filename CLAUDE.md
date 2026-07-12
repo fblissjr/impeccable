@@ -11,7 +11,7 @@
 >
 > Before committing, the sync verifies both overrides via `scripts/check-fork-overrides.mjs` (run it standalone any time: `bun scripts/check-fork-overrides.mjs`). It is a *positive* invariant check: it asserts `hooks.json` is absent and that **every** `scripts/` path in the plugin `SKILL.md` is rooted at `${CLAUDE_SKILL_DIR}/`. If upstream restructures those paths into a new form the blanket rewrite does not catch, the check fails loudly and names the offending line — that is the signal to update the rewrite rule in `sync-upstream.sh`.
 >
-> Telemetry: the daily version-check ping in `context.mjs` is off when `IMPECCABLE_NO_UPDATE_CHECK=1` is set (add `export IMPECCABLE_NO_UPDATE_CHECK=1` to `~/.bashrc` and `~/.zshrc`).
+> Telemetry: the daily version-check ping in `context.mjs` is off when `IMPECCABLE_NO_UPDATE_CHECK=1` is set (add `export IMPECCABLE_NO_UPDATE_CHECK=1` to your shell rc, e.g. `.bashrc` / `.zshrc`).
 
 ## Architecture (v3.0+)
 
@@ -212,7 +212,7 @@ IMPECCABLE_SKILL_BEHAVIOR_VERBOSE=1 bun run test:skill-behavior          # dump 
 
 **Three providers per run, every run.** The suite always exercises `claude-sonnet-4-6`, `gpt-5.5`, and `gemini-3.1-flash-lite`. Sonnet and GPT-5.5 are production-tier, matching what users actually run, so the pass/fail signal reflects real agent behavior rather than a cheap proxy; gemini stays on the flash-lite tier. **Don't substitute Claude alone**: many of the most useful findings come from divergence between providers.
 
-**Auth** lives in repo-root `.env` (copied from `~/code/impeccable-evals/.env`, gitignored). Providers skip cleanly when their key is unset; they don't fail.
+**Auth** lives in repo-root `.env` (copied from the evals repo's `.env`, gitignored). Providers skip cleanly when their key is unset; they don't fail.
 
 **Fifteen scenarios:**
 1. empty workspace → agent loads `reference/init.md`
@@ -380,12 +380,12 @@ Reference rules to copy from: `side-tab` (border, ~line 312), `low-contrast` (co
 
 ## Evals Framework (separate private repo)
 
-The eval framework lives in a separate private repo at `~/code/impeccable-evals/`. It measures whether the `/impeccable` skill improves or harms AI-generated frontend design by running the same brief through a model with and without the skill loaded.
+The eval framework lives in a separate private repo (`impeccable-evals`, a sibling checkout). It measures whether the `/impeccable` skill improves or harms AI-generated frontend design by running the same brief through a model with and without the skill loaded.
 
 **If you're picking up eval work, switch to that repo and read its `AGENT.md` first.** It captures model choices, sample size policy, lessons learned, common workflows, and gotchas.
 
 ```bash
-cd ~/code/impeccable-evals
+cd path/to/impeccable-evals
 bun run serve            # dashboard on http://localhost:8723
 ```
 
