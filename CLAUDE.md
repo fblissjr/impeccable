@@ -180,6 +180,8 @@ Unit tests (build orchestration, detector logic) run via `bun test`. Fixture tes
 
 **Expected baseline on this fork: exactly 1 failure.** `tests/hook-build.test.mjs` → "packages the Claude design hook in the plugin via plugin-root paths" asserts `plugin/hooks/hooks.json` exists — but fork override #1 deletes that file, and running `build:release` to regenerate it would revert the override. So this one test is permanently red here and cannot pass without breaking the override. Treat the count as the signal: **1 failure = clean, 2+ failures = a real regression to investigate.** `check-fork-overrides.mjs` is the fork's authoritative gate; this upstream test is not.
 
+If a future upstream merge takes the failure count to **0**, upstream renamed or removed that test — the baseline shifted, so update this note (new expected count, or delete it) rather than assuming the suite silently improved.
+
 **Important:** `tests/build.test.js` uses `spyOn(transformers, 'transformCursor')` with the named exports from `scripts/lib/transformers/index.js`. Those named exports (`transformCursor`, `transformClaudeCode`, etc.) are kept specifically for test spying, even though `build.js` itself uses `createTransformer + PROVIDERS` directly. **Do not delete them as "dead code"** — I made that mistake once and broke 8 tests.
 
 ### Live-mode E2E
