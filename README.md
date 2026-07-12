@@ -1,3 +1,4 @@
+<!-- path-privacy: skip-file -->
 # Impeccable
 
 Design guidance for AI coding agents. 1 skill, 23 commands, live browser iteration, and 46 deterministic detector rules for AI-generated frontend design.

@@ -1,3 +1,4 @@
+// path-privacy: skip-file
 /**
  * `impeccable skills` subcommand
  *

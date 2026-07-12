@@ -1,3 +1,4 @@
+// path-privacy: skip-file
 /**
  * End-to-end tests for `impeccable skills` subcommands.
  *

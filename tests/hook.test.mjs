@@ -1,3 +1,4 @@
+// path-privacy: skip-file
 /**
  * Unit tests for the Impeccable design hook.
  * Run: node --test tests/hook.test.mjs

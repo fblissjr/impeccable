@@ -1,3 +1,4 @@
+// path-privacy: skip-file
 import { describe, test, expect } from 'bun:test';
 import path from 'path';
 import { fileURLToPath } from 'node:url';

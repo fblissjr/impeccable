@@ -1,3 +1,4 @@
+<!-- path-privacy: skip-file -->
 # Harness Skills Capabilities Reference
 
 Source of truth for what each AI coding harness supports in terms of agent skills.
