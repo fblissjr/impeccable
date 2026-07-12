@@ -99,7 +99,7 @@ PREAMBLE_EOF
     echo "Could not find the Setup anchor to insert the fork preamble in $SKILL." >&2
     echo "Upstream likely reworded \"$SKILL_ANCHOR\"." >&2
     echo "Insert the preamble by hand and update SKILL_ANCHOR in scripts/sync-upstream.sh," >&2
-    echo "then: node scripts/check-fork-overrides.mjs && git add $SKILL && git commit" >&2
+    echo "then: bun scripts/check-fork-overrides.mjs && git add $SKILL && git commit" >&2
     echo "" >&2
     exit 2
   fi

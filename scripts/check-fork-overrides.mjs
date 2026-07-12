@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 //
 // check-fork-overrides.mjs — assert the two personal-fork overrides hold.
 //
@@ -21,7 +21,7 @@
 //
 // Exit 0 = overrides intact. Exit 1 = a violation a human must look at.
 //
-// Usage: node scripts/check-fork-overrides.mjs
+// Usage: bun scripts/check-fork-overrides.mjs
 //
 import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
