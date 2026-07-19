@@ -28,6 +28,12 @@ Upstream's `scripts/run-tests.mjs` exits at the first failing test file. On this
 
 Unlike the `plugin/` overrides, this is a normal tracked source edit: upstream merges surface it as an ordinary conflict in `scripts/run-tests.mjs`. Resolve by keeping the fork's behavior — the failure-collection loop is the part that matters; the injection seam exists only for the test and can be re-shaped if upstream restructures the runner.
 
+## Deviation 4: CI generated-output sync excludes `plugin/`
+
+`.github/workflows/sync-generated-output.yml` runs `bun run build:release` on pushes to `main` and commits regenerated provider output back. On this fork its `GENERATED_PATHS` list deliberately omits `plugin` (see the PERSONAL FORK comment in the workflow): letting CI commit `plugin/` would clobber deviations 1 and 2 on every source push. `plugin/` is managed by `scripts/sync-upstream.sh` here, not CI. On upstream merges that touch this workflow, keep the omission.
+
+Relatedly, upstream's **Versioning** and **Releases** sections in `CLAUDE.md` instruct running `bun run build:release` as a release step. Those workflows apply upstream (`pbakaus/impeccable`), where releases are actually cut — not on this fork. Here the never-run rule wins.
+
 ## Test baseline: exactly 1 failure = clean
 
 `tests/hook-build.test.mjs` → "packages the Claude design hook in the plugin via plugin-root paths" asserts `plugin/hooks/hooks.json` exists — but deviation 1 deletes that file, and regenerating it would revert the override. So this one test is permanently red here and cannot pass without breaking the fork. A clean `bun run test` ends with:
