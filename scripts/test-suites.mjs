@@ -29,7 +29,7 @@ export const SUITES = {
       /^site\/(pages|content|components|layouts)\//,
       /^README(\.npm)?\.md$/,
       /^cli\/bin\//,
-      /^tests\/(build|cleanup-deprecated|cli-ignores|context|context-signals|critique-storage|design-parser|docs-integrity|github-sheriff|hook|hook-build|impeccable-paths|openai-plugin|pin|shiki-theme|skills-cli|target-args|test-suites|windows-path-fix|zip)\.test\.(js|mjs)$/,
+      /^tests\/(build|cleanup-deprecated|cli-ignores|context|context-signals|critique-storage|design-parser|docs-integrity|github-sheriff|hook|hook-build|impeccable-paths|openai-plugin|pin|run-tests-keep-going|shiki-theme|skills-cli|target-args|test-suites|windows-path-fix|zip)\.test\.(js|mjs)$/,
       /^tests\/lib\//,
     ],
     commands: [
@@ -64,6 +64,7 @@ export const SUITES = {
           'tests/impeccable-paths.test.mjs',
           'tests/openai-plugin.test.mjs',
           'tests/pin.test.mjs',
+          'tests/run-tests-keep-going.test.mjs',
           'tests/target-args.test.mjs',
           'tests/shiki-theme.test.mjs',
           'tests/test-suites.test.mjs',

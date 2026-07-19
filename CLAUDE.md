@@ -12,6 +12,8 @@
 > Before committing, the sync verifies both overrides via `scripts/check-fork-overrides.mjs` (run it standalone any time: `bun scripts/check-fork-overrides.mjs`). It is a *positive* invariant check: it asserts `hooks.json` is absent and that **every** `scripts/` path in the plugin `SKILL.md` is rooted at `${CLAUDE_SKILL_DIR}/`. If upstream restructures those paths into a new form the blanket rewrite does not catch, the check fails loudly and names the offending line — that is the signal to update the rewrite rule in `sync-upstream.sh`.
 >
 > Telemetry: the daily version-check ping in `context.mjs` is off when `IMPECCABLE_NO_UPDATE_CHECK=1` is set (add `export IMPECCABLE_NO_UPDATE_CHECK=1` to your shell rc, e.g. `.bashrc` / `.zshrc`).
+>
+> A third, smaller deviation lives in `scripts/run-tests.mjs` (keep-going test runner; see **Testing** below). Unlike the two plugin overrides it is a normal tracked source edit, so upstream merges surface it as an ordinary conflict — resolve by keeping the fork's behavior.
 
 ## Architecture (v3.0+)
 
@@ -178,9 +180,13 @@ bun run test:live-e2e         # Opt-in: full-cycle live-mode E2E across framewor
 bun run test:skill-behavior   # Opt-in: LLM-backed checks that the skill text actually drives the agent's setup flow
 ```
 
-Unit tests (build orchestration, detector logic) run via `bun test`. Fixture tests (jsdom-based HTML detection) run via `node --test` because bun is too slow with jsdom. The `test` script handles this split automatically.
+Unit tests (build orchestration, detector logic) run via `bun test`. Fixture tests (jsdom-based HTML detection) run via `node --test` because bun is too slow with jsdom. The `test` script (`scripts/run-tests.mjs`) handles this split automatically.
 
-**Expected baseline on this fork: exactly 1 failure.** `tests/hook-build.test.mjs` → "packages the Claude design hook in the plugin via plugin-root paths" asserts `plugin/hooks/hooks.json` exists — but fork override #1 deletes that file, and running `build:release` to regenerate it would revert the override. So this one test is permanently red here and cannot pass without breaking the override. Treat the count as the signal: **1 failure = clean, 2+ failures = a real regression to investigate.** `check-fork-overrides.mjs` is the fork's authoritative gate; this upstream test is not.
+**A real `node` must be on PATH for `bun run test` to work.** When bun cannot find a node binary, `bun run` silently substitutes itself for `node` (via a temp shim dir it prepends to PATH), so the `node --test` suites execute under bun and crash with "Cannot use describe outside of the test runner". If you see that error, the fix is environmental: make a real node visible to non-interactive shells (lazy-loaded version managers like nvm don't). The same substitution can silently affect any `bun run` script that shells out to `node`.
+
+**Fork deviation in the runner: keep-going.** Upstream's `scripts/run-tests.mjs` exits at the first failing test file, which would truncate every run at this fork's expected permanent failure (below) and skip the remaining suites. This fork patches the runner to run everything, print a `N failing command(s)` summary at the end, and exit non-zero only then (covered by `tests/run-tests-keep-going.test.mjs`, registered in the core suite). On upstream merges that touch `run-tests.mjs`, keep the keep-going behavior.
+
+**Expected baseline on this fork: exactly 1 failure.** `tests/hook-build.test.mjs` → "packages the Claude design hook in the plugin via plugin-root paths" asserts `plugin/hooks/hooks.json` exists — but fork override #1 deletes that file, and running `build:release` to regenerate it would revert the override. So this one test is permanently red here and cannot pass without breaking the override. A clean `bun run test` therefore ends with `1 failing command(s): failed: node --test tests/hook-build.test.mjs`. Treat the count as the signal: **1 failure = clean, 2+ failures = a real regression to investigate.** `check-fork-overrides.mjs` is the fork's authoritative gate; this upstream test is not.
 
 If a future upstream merge takes the failure count to **0**, upstream renamed or removed that test — the baseline shifted, so update this note (new expected count, or delete it) rather than assuming the suite silently improved.
 

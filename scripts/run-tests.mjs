@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
-import { DEFAULT_SUITES, OPT_IN_SUITES, SUITES, expandSuites } from './test-suites.mjs';
+import { pathToFileURL } from 'node:url';
+
+// Fork deviation: suites are injectable for the keep-going tests, and failures
+// no longer abort the run (this fork's baseline is one permanently-red test).
+const suitesModuleUrl = process.env.RUN_TESTS_SUITES_MODULE
+  ? pathToFileURL(process.env.RUN_TESTS_SUITES_MODULE).href
+  : new URL('./test-suites.mjs', import.meta.url).href;
+const { DEFAULT_SUITES, OPT_IN_SUITES, SUITES, expandSuites } = await import(suitesModuleUrl);
 
 const args = process.argv.slice(2);
 
@@ -23,6 +30,8 @@ try {
   process.exit(1);
 }
 
+const failures = [];
+
 for (const suiteName of suites) {
   const suite = SUITES[suiteName];
   console.log(`\n## test:${suiteName}`);
@@ -30,6 +39,12 @@ for (const suiteName of suites) {
   for (const command of suite.commands) {
     runCommand(command);
   }
+}
+
+if (failures.length > 0) {
+  console.error(`\n${failures.length} failing command(s):`);
+  for (const failure of failures) console.error(`  failed: ${failure}`);
+  process.exit(1);
 }
 
 function runCommand(command) {
@@ -54,16 +69,18 @@ function runCommand(command) {
 }
 
 function runProcess(cmd, args, { env }) {
-  console.log(`$ ${formatCommand(cmd, args)}`);
+  const label = formatCommand(cmd, args);
+  console.log(`$ ${label}`);
   const result = spawnSync(cmd, args, {
     stdio: 'inherit',
     env,
   });
   if (result.error) {
     console.error(result.error.message);
-    process.exit(1);
+    failures.push(label);
+    return;
   }
-  if (result.status !== 0) process.exit(result.status || 1);
+  if (result.status !== 0) failures.push(label);
 }
 
 function formatCommand(cmd, args) {
