@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # sync-upstream.sh — merge upstream (pbakaus/impeccable) into this personal fork
-# and deterministically re-apply the two fork overrides documented in CLAUDE.md:
+# and deterministically re-apply the two fork overrides documented in FORK.md:
 #
 #   1. plugin/hooks/hooks.json is deleted (no marketplace PostToolUse hook).
 #   2. plugin/skills/impeccable/SKILL.md references bundled scripts as
